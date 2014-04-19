@@ -24,12 +24,13 @@ set.seed(128)
 ## generate the sequence of genes to be sampled
 id <- sample (1:dim(arab.pre)[1], n)  
 
+arab.sample <- arab.pre[id, ]
 
 ##  store the variances for gene sampled 
 vari <- c()
   
 for (i in 1:n){
-  y <- arab.pre[id[i], ]
+  y <- arab.sample[i, ]
   a <- glmmadmb(y ~1, random=  ~1 | group, zeroInflation=F, 
                 link="log",  family = "nbinom")
   vari[i] <- as.numeric(a$S)  #### output the variance
@@ -56,19 +57,27 @@ a <- glmmadmb(y~1, random=  ~1 | group, zeroInflation=F,
 summary(a)
 ## in general, a gives smaller variance than b
 
-head(arab.dat)
-y1 <- as.numeric(arab.dat[6, ])
-y2 <- as.numeric(arab.dat[7502, ])
-y3 <- as.numeric(arab.dat[19895, ])
-y4 <- as.numeric(arab.pre[id[25],])
-y5 <- as.numeric(arab.dat[23,])
-y6 <- as.numeric(arab.dat[id[12],])
-y7 <- as.numeric(arab.dat[7782,])
-y8 <- as.numeric(arab.dat[12475,])
-cbind(y1, y2, y3, y4, y5, y6, y7, y8)
 
-a <- glmmadmb(y1~1, random=  ~1 | group, zeroInflation=F, 
-              link="log",  family = "nbinom")
+
+
+
+
+
+## resluts for the following genes are compared to NLMIXED in SAS and they are pretty close
+
+# head(arab.dat)
+# y1 <- as.numeric(arab.dat[6, ])
+# y2 <- as.numeric(arab.dat[7502, ])
+# y3 <- as.numeric(arab.dat[19895, ])
+# y4 <- as.numeric(arab.pre[id[25],])
+# y5 <- as.numeric(arab.dat[23,])
+# y6 <- as.numeric(arab.dat[id[12],])
+# y7 <- as.numeric(arab.dat[7782,])
+# y8 <- as.numeric(arab.dat[12475,])
+# cbind(y1, y2, y3, y4, y5, y6, y7, y8)
+
+# a <- glmmadmb(y1~1, random=  ~1 | group, zeroInflation=F, 
+#               link="log",  family = "nbinom")
 
 #  installing R-INLA package
 # source("http://www.math.ntnu.no/inla/givemeINLA-testing.R") 
