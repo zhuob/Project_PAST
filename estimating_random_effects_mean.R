@@ -15,16 +15,16 @@ library(glmmADMB)
 group <- as.factor(c(1, 1,1, 2,2,3,3,3, 4, 4, 4))
 
 ## filter genes with 1 count per sample on average
-arab.pre <- as.matrix(arab.dat[rowSums(arab.dat)>= dim(arab.dat)[2], ])
+arab.filter <- as.matrix(arab.dat[rowSums(arab.dat)>= dim(arab.dat)[2], ])
 
 #  number of genes to be sampled
 n <- 1000
 set.seed(128) 
 
 ## generate the sequence of genes to be sampled
-id <- sample (1:dim(arab.pre)[1], n)  
+id <- sample (1:dim(arab.filter)[1], n)  
 
-arab.sample <- arab.pre[id, ]
+arab.sample <- arab.filter[id, ]
 
 ##  store the variances for gene sampled 
 vari <- c()
@@ -89,4 +89,44 @@ file.show(system.file("tpl","glmmadmb.tpl",package="glmmADMB"))
 
 
 ##  to see whether it makes difference if library sizes are normalized
+library(NBPSeq)
 
+
+norm.factors <- estimate.norm.factors(arab.pre)
+
+lib.size <- colSums(arab.pre)
+max(norm.factors)/min(norm.factors) #  3.22
+max(lib.size)/min(lib.size) # 6.44
+
+
+## initializing relative frequency matrixa
+arab.filter.norm<- matrix(0, ncol= dim(arab.pre)[2], nrow = dim(arab.pre)[1])
+
+
+## multiply each count by the corresponding norm.factor and round to the 
+## nearest integer
+for ( i in 1: dim(arab.filter)[2])
+{
+  arab.filter.norm[, i]= round(arab.filter[, i]*norm.factors[i], 0)
+  
+}
+
+arab.sample.norm <- arab.filter.norm[id, ]
+
+head(arab.sample)
+head(arab.sample.norm)
+
+var.norm <- c()
+for (i in 1:n){
+  y <- arab.sample.norm[i, ]
+  a <- glmmadmb(y ~1, random=  ~1 | group, zeroInflation=F, 
+                link="log",  family = "nbinom")
+  var.norm[i] <- as.numeric(a$S)  #### output the variance
+}
+
+pdf("estimated_variance_normalized_boxplot_hist.pdf")
+hist(log(vari), main=paste("number of genes =", n))
+hist(log(var.norm), main=paste("number of genes =", n, "normalized"))
+boxplot(log(vari), log(var.norm) )
+axis(1, 1:2, c("regular","normalized" ), las=1)
+dev.off()
