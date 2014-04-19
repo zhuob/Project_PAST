@@ -85,3 +85,8 @@ summary(a)
 # to check how glmmadmb  approximate the likelihood
 file.show(system.file("tpl","glmmadmb.tpl",package="glmmADMB"))
 
+
+
+
+##  to see whether it makes difference if library sizes are normalized
+
