@@ -18,8 +18,10 @@ group <- as.factor(c(1, 1,1, 2,2,3,3,3, 4, 4, 4))
 arab.filter <- as.matrix(arab.dat[rowSums(arab.dat)>= dim(arab.dat)[2], ])
 
 #  number of genes to be sampled
-n <- 1000
+n <- 100
 set.seed(128) 
+
+set.seed(5)
 
 ## generate the sequence of genes to be sampled
 id <- sample (1:dim(arab.filter)[1], n)  
@@ -28,7 +30,8 @@ arab.sample <- arab.filter[id, ]
 
 ##  store the variances for gene sampled 
 vari <- c()
-  
+
+
 for (i in 1:n){
   y <- arab.sample[i, ]
   a <- glmmadmb(y ~1, random=  ~1 | group, zeroInflation=F, 
@@ -39,6 +42,11 @@ for (i in 1:n){
 ###  some warning message would pop up. 
 #  1: In glmmadmb(y ~ 1, random = ~1 | group, zeroInflation = F, link = "log",  :
 # Convergence failed:log-likelihood of gradient= -0.00148958
+# convergence issue 
+
+# try y <- c(34, 43, 42, 7, 3, 0, 0, 0, 0, 0, 0 )
+# or y <- arab.filter[21251,] 
+
 
 ## draw a histogram of the log variances.
 hist(log(vari), main=paste("number of genes =", n))
