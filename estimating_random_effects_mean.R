@@ -27,10 +27,9 @@ arab.prepare <- prepare.nb.data(arab.filter, norm.factors=norm.factors)
 names(arab.prepare)
 
 #  number of genes to be sampled
-n <- 100
-set.seed(128) 
+n <- 1000
+set.seed(120) 
 
-set.seed(5)
 
 ## generate the sequence of genes to be sampled
 id <- sample (1:dim(arab.filter)[1], n)  
@@ -66,7 +65,16 @@ for (i in 1:n)
   var.norm[i] <- as.numeric(a$S)  #### output the variance
   
 }
-  
+length(var.norm)
+y <- arab.sample[314, ]
+
+a <- glmmadmb(y ~1 + offset(log(arab.prepare$eff.lib.sizes)), 
+              random=  ~1 | group,
+              zeroInflation=F, link="log",  family = "nbinom")
+
+
+
+boxplot(log(vari), log(var.norm))
 
 ###  some warning message would pop up. 
 #  1: In glmmadmb(y ~ 1, random = ~1 | group, zeroInflation = F, link = "log",  :
