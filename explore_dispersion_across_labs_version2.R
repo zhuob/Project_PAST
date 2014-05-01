@@ -61,18 +61,6 @@ arab12 <- read.table("arab12.txt", header = T)
 arab12 <- arab12[ which(rowSums(arab12[, -1])> dim(arab12)[2]),] 
 
 
-## Method of moments:  var / mean^2
-arab111 <- arab1
-dim(arab1)
-row.names(arab111) <- arab1[,1]
-arab111 <- arab111[, -1]
-
-arab222<- arab2
-row.names(arab222) <- arab2[,1]
-arab222 <- arab222[,-1]
-head(arab222)
-head(arab111)
-
 
 dispersion.mom <- function(data, g, r)  
   # Input: need data, number of group (g), and number of replica per group(r)  
@@ -133,7 +121,10 @@ group <- c(1,1,2,2,3,3, 4, 4)
 disp.lab2.cox_reid <- dispersion.edgeR(arab2, group)
 
 group = c(1,1, 2,2,3, 3, 4, 4, 5, 5, 6, 6, 7, 7)
-disp.lab6.cox_reid <- dispersion.edgeR(arab6[, 2:15], group)
+disp.lab6.cox_reid <- dispersion.edgeR(arab6[, 1:14], group)
+cor(disp.lab6.cox_reid,disp.lab1.cox_reid )
+## data <- merge(disp.lab1.cox_reid, disp.lab6.cox_reid, by ="row.names")
+## cor(log(data[, 2:3]))
 
 group = c(1,1, 1,2,2, 2, 3, 3, 3, 4, 4, 4)
 disp.lab7.cox_reid <- dispersion.edgeR(arab7, group)
@@ -182,11 +173,6 @@ disp.6labs.cox_reid <- merge(merge4, disp.lab9.cox_reid, by = "Gene")
 
 dim(disp.6labs.cox_reid)
 
-
-#  dispersion matrix estimated by qCML in edgeR
-
-dim(disp.7labs)
-dim(disp.7labs.cox_reid)
 
 
 

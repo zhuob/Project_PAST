@@ -10,8 +10,6 @@ setwd("/home/zhuob/Project2014/arabidopsis_data/")
 #   
 # }
 
-head(datalist[[4]])
-
 arab1 <- read.table("arab1.txt", header = T) 
 ## make sure at least one count on average for each row
 arab1 <- arab1[ which(rowSums(arab1[, 2:dim(arab1)[2]])>= dim(arab1)[2]),] 
@@ -337,6 +335,51 @@ for ( i in 1: n)
 
 ###
 colMeans(disp.7labs.cox_reid[, 2:dim(disp.7labs.cox_reid)[2]])
+
+
+
+colSums(arab1[, 2:7])
+colSums(arab2[, 2:9])
+colSums(arab6[, 2:13])
+colSums(arab7[, 2:13])
+colSums(arab8[, 2:13])
+colSums(arab9[, 2:7])
+colSums(arab12[, 2:7])
+
+rank(c(
+     mean(colSums(arab1[, 2:7])),
+     mean(colSums(arab2[, 2:9])),
+     mean(colSums(arab6[, 2:15])),
+     mean(colSums(arab7[, 2:13])),
+     mean( colSums(arab8[, 2:13])),
+     mean(colSums(arab9[, 2:7])),
+     mean( colSums(arab12[, 2:7]))  
+)
+  )
+
+round(cor(log(disp.7labs.cox_reid[, -1])),2)
+pairs(log(disp.7labs.cox_reid[, -1]))
+head(disp.7labs.cox_reid)
+ 
+NBPSeq:::smart.plot(log(disp.7labs.cox_reid[,c(4,2)]), clip = 16, pch = 20
+                    , xlab="log-dispersion (lab1)", ylab="log-dispersion (lab 6)",
+        main= paste( "cor =", round(cor(log(disp.7labs.cox_reid[, c(2, 4)]))[2, 1], 2)))
+
+head(arab6)
+arab6$rowsum.lab6 = rowSums(arab6[,1:12])
+arab6$Gene <- row.names(arab6)
+arab6.rowsum.disp = merge(disp.lab7.cox_reid, arab6[, c(dim(arab6)[2]-1, dim(arab6)[2])], by= "Gene")
+head(arab6[, c(1, dim(arab6)[2]-1)])
+head(arab6.rowsum.disp)
+
+
+head(disp.6labs.cox_reid)
+
+round(cor(log(disp.7labs.cox_reid[, c(2, 4)]))[2, 1], 2)
+round(cor(log(arab6.rowsum.disp[, 2:3]))[2, 1], 2)
+NBPSeq:::smart.plot(log(arab6.rowsum.disp[, 2:3]), clip= 16, pch = 20, 
+  main= paste( "both in log scale, cor= ",
+               round(cor(log(arab6.rowsum.disp[, 2:3]))[2, 1], 2)))
 
 
 
