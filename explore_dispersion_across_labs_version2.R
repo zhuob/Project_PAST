@@ -2,8 +2,9 @@
 setwd("/home/zhuob/Project2014/Project1/data")
 library(edgeR)
 library(NBPSeq)
+library(dplyr)
 
-source("/home/zhuob/Project2014/Project1/man/disp.mom.R")
+source("/home/zhuob/Project2014/Project1/R/disp.mom.R")
 
 arab1 <- readRDS("arab1.rds")
 
@@ -40,17 +41,23 @@ cor(log(merge[, -1]))
 
 # -- -------------------------  Cox-Reid Profile Likelihood ------------------------
 
-source("/home/zhuob/Project2014/Project1/man/disp.edgeR.R")
+source("/home/zhuob/Project2014/Project1/R/dispersion.edgeR.R")
+source("/home/zhuob/Project2014/Project1/R/create.geneColumn.R")
 
 
 group.id <- c(1, 1, 1, 2, 2, 2)
 disp.lab1.cox_reid <- dispersion.edgeR(arab1, group.id)
+head(disp.lab1.cox_reid)
+disp.lab1.cox_reid <- create.geneColumn(disp.lab1.cox_reid)
 
 group <- c(1,1,2,2,3,3, 4, 4)
 disp.lab2.cox_reid <- dispersion.edgeR(arab2, group)
+disp.lab2.cox_reid <- create.geneColumn(disp.lab2.cox_reid)
+
 
 group.id = c(1,1, 2,2,3, 3, 4, 4, 5, 5, 6, 6, 7, 7)
 disp.lab6.cox_reid <- dispersion.edgeR(arab6[, 1:14], group.id)
+disp.lab6.cox_reid <- create.geneColumn(disp.lab6.cox_reid)
 
 
 
@@ -60,44 +67,36 @@ disp.lab6.cox_reid <- dispersion.edgeR(arab6[, 1:14], group.id)
 
 group = c(1,1, 1,2,2, 2, 3, 3, 3, 4, 4, 4)
 disp.lab7.cox_reid <- dispersion.edgeR(arab7, group)
+disp.lab7.cox_reid <- create.geneColumn(disp.lab7.cox_reid)
+
 
 group = c(1,1, 1,2,2, 2, 3, 3, 3, 4, 4, 4)
 disp.lab8.cox_reid <- dispersion.edgeR(arab8, group)
+disp.lab8.cox_reid <- create.geneColumn(disp.lab8.cox_reid)
+
 
 group = c(1,1, 1,2,2, 2)
 disp.lab9.cox_reid <- dispersion.edgeR(arab9, group)
+disp.lab9.cox_reid <- create.geneColumn(disp.lab9.cox_reid)
+
 
 group = c(1,1, 2, 2, 3,3)
 disp.lab12.cox_reid <- dispersion.edgeR(arab12, group)
+disp.lab12.cox_reid <- create.geneColumn(disp.lab12.cox_reid)
 
 
-merge1 <- merge(disp.lab1.cox_reid, disp.lab2.cox_reid, by = "row.names")
+disp.7labs.cox_reid <- join_all(
+    list(disp.lab1.cox_reid, disp.lab2.cox_reid,
+        disp.lab6.cox_reid, disp.lab7.cox_reid,disp.lab8.cox_reid,
+        disp.lab9.cox_reid, disp.lab12.cox_reid),
+      by = "Gene")
 
 
-## notice after Merge, the row.names become a new column
-colnames(merge1)=c("Gene","disp.lab1", "disp.lab2")
-disp.lab6.cox_reid[, 2]= row.names(disp.lab6.cox_reid) 
-colnames(disp.lab6.cox_reid)=c( "disp.lab6","Gene")
-merge2 <- merge(merge1, disp.lab6.cox_reid, by = "Gene")
+colnames(disp.7labs.cox_reid) <- c("Gene", "lab1", "lab2", "lab6",
+                                  "lab7", "lab8", "lab9", "lab12")
 
 
-disp.lab7.cox_reid[, 2]= row.names(disp.lab7.cox_reid) 
-colnames(disp.lab7.cox_reid)=c( "disp.lab7","Gene")
-merge3 <- merge(merge2, disp.lab7.cox_reid, by = "Gene")
-
-disp.lab8.cox_reid[, 2]= row.names(disp.lab8.cox_reid) 
-colnames(disp.lab8.cox_reid)=c( "disp.lab8","Gene")
-merge4 <- merge(merge3, disp.lab8.cox_reid, by = "Gene")
-
-disp.lab9.cox_reid[, 2]= row.names(disp.lab9.cox_reid) 
-colnames(disp.lab9.cox_reid)=c( "disp.lab9","Gene")
-merge5 <- merge(merge4, disp.lab9.cox_reid, by = "Gene")
-
-
-disp.lab12.cox_reid[, 2]= row.names(disp.lab12.cox_reid) 
-colnames(disp.lab12.cox_reid)=c( "disp.lab12","Gene")
-disp.7labs.cox_reid <- merge(merge5, disp.lab12.cox_reid, by = "Gene")
-
+disp.7labs.cox_reid <- disp.7labs.cox_reid[complete.cases(disp.7labs.cox_reid),]
 
 head(disp.7labs.cox_reid)
 dim(disp.7labs.cox_reid)
@@ -178,6 +177,7 @@ y <- merge(disp.lab6.cox_reid, rel.freq, by ="row.names")
 head(y)
 arab6.rel.freq.disp <- y[which(y[, 4]>0),-3] 
 
+
 rho2 <-  round(cor(log(arab6.rel.freq.disp[, 2:3]))[2, 1], 3)
 NBPSeq:::smart.plot(log(arab6.rel.freq.disp[, 2:3]), clip= 16, pch = 20, 
   main= paste( "both in log scale, cor= ",rho2))
@@ -185,21 +185,6 @@ NBPSeq:::smart.plot(log(arab6.rel.freq.disp[, 2:3]), clip= 16, pch = 20,
 
 
 
-
-
-
-library(SeqDisp)
-
-group = c(1,1, 2,2,3, 3, 4, 4, 5, 5, 6, 6, 7, 7)
-x <- model.matrix(~group)
-a <- poly.gamma.reg(counts= arab6, group)
-
-
-counts <- arab6
-head(counts)
-m = dim(counts)[1]
-n = dim(counts)[2]
-mu.mom = expandAsMatrix(rowMeans(counts), dim=c(m,n))
 
 
 
