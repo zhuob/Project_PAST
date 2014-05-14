@@ -1,5 +1,5 @@
 
-##' @title Calculating Likelihood Score 
+##' @title Calculating Likelihood Score and estimating the sigma^2
 ##' 
 ##' @param data  read counts matrix
 ##' @param pred  predictor dispersion vector
@@ -62,8 +62,23 @@ likelihood.score <- function(data, pred, response, d, group)
   
   likelihood <- ll.nb(kappa = 1/phi, mu=getmu$mu,  y=y$counts)
   
+  
+  ###  estimating sigma^2  for this particular regression
+  source("/home/zhuob/Project2014/Project1/R/estimate.dispersion.var.R")
+  normFactor <- estimate.norm.factors(as.matrix(arab), method="AH2010")
+  nb.data <- prepare.nb.data(as.matrix(arab), norm.factor=normFactor)
+  dispersion <- dispersion.edgeR(nb.data$counts, group)
+  dispersion1 <- expandAsMatrix(as.vector(dispersion$disp), 
+                                c(dim(arab)[1], dim(arab)[2]))
+  
+  x <- model.matrix(~as.factor(group))
+  
+  # debug(estimate.dispersion.var)
+  sigma <- estimate.dispersion.var.edgeR(nb.data, dispersion1, x = x)
+  
+  obj <- list()
   obj$likelihood <- likelihood
-  obj$count <- arab
+  obj$sigma <- sigma$maximum
   return (obj) 
   
 }  

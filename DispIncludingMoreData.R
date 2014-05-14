@@ -99,8 +99,12 @@ library(MASS)
 
 str(arab2)
 
+undebug(likelihood.score)
+
 l1 <- likelihood.score(data= arab1, pred="NULL",response= yy1, d=1, group=group1) #  -597254.7
 l2 <- likelihood.score(data= arab1, pred=yy6, response= yy1, d=1, group=group1) # -595482
+
+
 
 
 # figure out the deviance 
