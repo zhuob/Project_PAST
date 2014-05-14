@@ -9,8 +9,7 @@ source("/home/zhuob/Project2014/Project1/R/dispersion.edgeR.R")
 source("/home/zhuob/Project2014/Project1/R/create.geneColumn.R")
 source("/home/zhuob/Project2014/Project1/R/mean.disp.matrix.R")
 source("/home/zhuob/Project2014/Project1/R/likelihood.score.R")
-
-
+source("/home/zhuob/Project2014/Project1/R/estimate.dispersion.var.R")
 
 arab1 <- readRDS("arab1.rds")
 arab2 <- readRDS("arab2.rds")
@@ -101,76 +100,31 @@ str(arab2)
 
 undebug(likelihood.score)
 
-l1 <- likelihood.score(data= arab1, pred="NULL",response= yy1, d=1, group=group1) #  -597254.7
-l2 <- likelihood.score(data= arab1, pred=yy6, response= yy1, d=1, group=group1) # -595482
+l0 <- likelihood.score(data= arab1, pred="NULL",response= yy1, d=1, group=group1) #  -597254.7
+l1 <- likelihood.score(data= arab1, pred=yy6, response= yy1, d=1, group=group1) # -595482
 
+
+source("/home/zhuob/Project2014/Project1/R/sigma.est.R")
+
+s1.1 <- sigma.est(l1, method="NBQ")
+s1.2 <- sigma.est(l1, method="edgeR")
+s1.3 <- sigma.est(l1, method= "gamma.reg")
+
+
+l6 <- likelihood.score(data= arab6, pred=yy7, response= yy6, d=1, group=group6)
+s6.1 <- sigma.est(l6, method="NBQ")
+s6.2 <- sigma.est(l6, method="edgeR")
+s6.3 <- sigma.est(l6, method= "gamma.reg")
+
+
+l7 <- likelihood.score(data= arab1, pred=yy7, response= yy1, d=1, group=group1) 
+s7.1 <- sigma.est(l7, method="NBQ")
+s7.2 <- sigma.est(l7, method="edgeR")
+s7.3 <- sigma.est(l7, method= "gamma.reg")
 
 
 
 # figure out the deviance 
-
-
-# library(SeqDisp)
-# path.mus = "/home/zhuob/Project2014/temp/"
-# setwd(path.mus)
-#
-# quantify.noise(dt="mouse", m=5000, sub.col=1:6, evaluate=c(TRUE, FALSE, FALSE), seed=539, path.o=path.mus)
-#
-# quantify.noise(dt="mouse", m=5000, sub.col=1:6, evaluate=c(FALSE, TRUE, FALSE), seed=539, path.o=path.mus)
-
-
-# ddat <- load("mouse.5000.NBQ.RData")
-
-# dim(ddat)
-
-
-# ddat2 <- load("sigma.m5000.n6.NBQ.real.Rdata")
-
-# dim(arab1)
-
-source("/home/zhuob/Project2014/Project1/R/estimate.dispersion.var.R")
-normFactor <- estimate.norm.factors(as.matrix(l1$count), method="AH2010")
-nb.data <- prepare.nb.data(as.matrix(l1$count), norm.factor=normFactor)
-dispersion <- dispersion.edgeR(nb.data$counts, group1)
-dispersion1 <- expandAsMatrix(as.vector(dispersion$disp), 
-                                c(dim(l1$count)[1], dim(l1$count)[2]))
-
-x <- model.matrix(~as.factor(group1))
-
-DISPERSION <- estimate.dispersion(nb.data = nb.data, x = x, model = "NBQ", 
-                                  method = "MAPL")
-colnames(dispersion) <- "estimates"
-
-head(dispersion1)
-?expandAsMatrix
-
-# debug(estimate.dispersion.var)
-sigma <- estimate.dispersion.var.edgeR(nb.data, dispersion1, x = x)
-
-
-#------------------------ under regression context ------
-y <- yy1
-pred <- yy6
-deg <- 1
-
-fit <- glm(y ~ poly(xx1, degree=deg) + poly(xx2, degree=deg) +
-             poly(xx6, degree=deg) + poly(xx7, degree=deg) +
-             poly(xx8, degree=deg) + poly(xx9, degree=deg)
-           + poly(pred, degree = 1), family=Gamma(link="log"))
-
-step <- stepAIC(fit, direction= "both") 
-
-length(phi.hat)
-phi.hat <- fitted(step)
-disp.fit <- expandAsMatrix(as.vector(phi.hat), 
-                              c(dim(l1$count)[1], dim(l1$count)[2]))
-
-
-
-sigma2 <- estimate.dispersion.var.edgeR(nb.data, disp.fit, x=x)
-sigma2
-
-# undebug(estimate.dispersion.var)
 
 
 # quantify.noise(dt="mouse", m=5000, sub.col=1:6, evaluate=c(TRUE, FALSE, FALSE), seed=539, path.o=path.mus)
