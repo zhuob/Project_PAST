@@ -136,22 +136,22 @@ for ( i in 1: n)
 ###
 colMeans(disp.7labs.cox_reid[, 2:dim(disp.7labs.cox_reid)[2]])
 
-colSums(arab1[, 2:7])
-colSums(arab2[, 2:9])
-colSums(arab6[, 2:13])
-colSums(arab7[, 2:13])
-colSums(arab8[, 2:13])
-colSums(arab9[, 2:7])
-colSums(arab12[, 2:7])
+colSums(arab1[, -1])
+colSums(arab2[, -1])
+colSums(arab6[, -1])
+colSums(arab7[, -1])
+colSums(arab8[, -1])
+colSums(arab9[, -1])
+colSums(arab12[, -1])
 
 rank(c(
-     mean(colSums(arab1[, 2:7])),
-     mean(colSums(arab2[, 2:9])),
-     mean(colSums(arab6[, 2:15])),
-     mean(colSums(arab7[, 2:13])),
-     mean( colSums(arab8[, 2:13])),
-     mean(colSums(arab9[, 2:7])),
-     mean( colSums(arab12[, 2:7]))  
+     mean(colSums(arab1[, -1])),
+     mean(colSums(arab2[, -1])),
+     mean(colSums(arab6[, -1])),
+     mean(colSums(arab7[, -1])),
+     mean( colSums(arab8[, -1])),
+     mean(colSums(arab9[, -1])),
+     mean( colSums(arab12[, -1]))  
 )
   )
 
@@ -169,19 +169,6 @@ y <- prepare.nb.data(arab6)
 rel.freq <-  apply(y$rel.frequencies, 1, sum)
 ## keep the gene names
 rel.freq <- data.frame(rel.freq)
-
-head(disp.lab6.cox_reid)
-head(rel.freq)
-y <- merge(disp.lab6.cox_reid, rel.freq, by ="row.names")
-# remove rows with 0 rel. freq
-head(y)
-arab6.rel.freq.disp <- y[which(y[, 4]>0),-3] 
-
-
-rho2 <-  round(cor(log(arab6.rel.freq.disp[, 2:3]))[2, 1], 3)
-NBPSeq:::smart.plot(log(arab6.rel.freq.disp[, 2:3]), clip= 16, pch = 20, 
-  main= paste( "both in log scale, cor= ",rho2))
-
 
 
 
