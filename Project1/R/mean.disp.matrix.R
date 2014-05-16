@@ -20,7 +20,8 @@ mean.disp.matrix <- function(data, group)
   disp2 <- disp1[which(disp1[, 2]>0),]
   
   # get rel.mean frequencies from NBPSeq
-  y <- prepare.nb.data(data)
+  nf <- estimate.norm.factors(data)	
+  y <- prepare.nb.data(data, norm.factors= nf)
   # average of rel. mean across samples
   rel.freq <- data.frame(rel.freq=apply(y$rel.frequencies, 1, mean))
   rel.freq1 <- create.geneColumn(rel.freq)
