@@ -23,7 +23,8 @@ likelihood.score <- function(data, pred, response, d, group)
   deg <- d
   if (pred == "NULL")
   {
-    fit <- glm(y ~ poly(xx1, degree=deg) + poly(xx2, degree=deg) +
+    fit <- glm(y ~ poly(xx0, degree = deg) + poly(xx1, degree=deg) +
+                 poly(xx2, degree=deg) +
                  poly(xx6, degree=deg) + poly(xx7, degree=deg) +
                  poly(xx8, degree=deg) + poly(xx9, degree=deg)
                , family=Gamma(link="log"))
@@ -33,7 +34,8 @@ likelihood.score <- function(data, pred, response, d, group)
   
   else 
   {
-    fit <- glm(y ~ poly(xx1, degree=deg) + poly(xx2, degree=deg) +
+    fit <- glm(y ~ poly(xx0, degree = deg) + poly(xx1, degree=deg) + 
+                 poly(xx2, degree=deg) +
                  poly(xx6, degree=deg) + poly(xx7, degree=deg) +
                  poly(xx8, degree=deg) + poly(xx9, degree=deg)
                + poly(pred, degree = 1), family=Gamma(link="log"))

@@ -29,7 +29,7 @@ sigma.est <- function(obj, method ="gamma.reg")
     {
     dispersion <- dispersion.edgeR(nb.data$counts, group)
     dispersion1 <- expandAsMatrix(as.vector(dispersion$disp), 
-                                  c(dim(arab)[1], dim(arab)[2]))
+                                  c(dim(count)[1], dim(count)[2]))
     
     sigma <- estimate.dispersion.var.edgeR(nb.data, dispersion1, x = x)
     }
