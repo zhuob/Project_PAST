@@ -156,6 +156,10 @@ s7.2 <- sigma.est(l7, method="edgeR")
 s7.3 <- sigma.est(l7, method= "gamma.reg")
 
 
+
+
+
+
 # figure out the deviance 
 
 
