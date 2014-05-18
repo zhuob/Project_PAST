@@ -81,32 +81,39 @@
 \end{enumerate}
 
 \section{Introduction}
-RNA sequencing (RNA-Seq) has gained more and more popularity in measuring gene  expression for the past few years. A variety of experiments  have been conducted in this routine for all kinds of purpose, among which one major task is to detect differential expression (DE) genes. Several R packages (e.g., edgeR, DESeq2, NBPSeq)[{\color{green}{reference needed}}] are available to implement DE analysis for RNA-Seq data. The exponential growth of such routine generates a large number of count datasets, making comparison between different experiments possible. It is therefore interesting to ask, for a specific species, whether there is similarity or dissimilarity across experiments. This motivates us to propose several interesting questions. First, if there are some genes stably expressed despite various experimental conditions; Second, whether there is any commonality between the mean and dispersion across different experiments. We hope by answering these questions, we're able to provide a better perspective to look at normalization issue, as well as modelling approach of mean and dispersion. \\
+RNA sequencing (RNA-Seq) has gained {\color{red}{\st{more and more}}} popularity in measuring gene  expression for the past few years. A variety of experiments  have been conducted in this routine for {\color{red}{\st{all kinds of purpose}}} different purposes, among which one major task is to detect differential expression (DE) genes. Several R packages (e.g., edgeR, DESeq2, NBPSeq)[{\color{green}{reference needed}}] are available to implement DE analysis for RNA-Seq data. The exponential growth of such routine generates a large number of count datasets, making comparison between different experiments possible. 
+[from Translational signatures and mRNA...]
+Analysis of datasets of stably expressed genes would provide more accurate and reliable measurements of associations between variations of a specific gene characteristic and expression, and how distinct gene features work to optimize gene expression.
+
+It is therefore interesting to ask, for a specific species, whether there is similarity or dissimilarity across experiments. This motivates us to propose several interesting questions. First, whether there are some genes stably expressed despite various experimental conditions; Second, whether there is any commonality between the mean and dispersion across different experiments. We hope by answering these questions, we're able to provide a better perspective to look at normalization issue, as well as modelling approach of mean and dispersion\footnote{we haven't brought up NB distribution yet}. \\
 
 
 Although statistical models vary from one to another, it is widely assumed that gene counts follow a Negative Binomial (NB) distribution [{\color{green}{reference needed}}]. This assumption has the advantage of capturing both the expression level (mean $\mu$) and biological variation (dispersion parameter $\phi$). The variance of NB distribution depends on the mean in the form of 
 \[\text{Var}= \mu +\mu^2\phi\eqno(1.1)\]
-where the first term can represent mean expression level and the second term can represent variance due to variation between biological replicates. However, quantifying biological variation has never been an easy task. The major challenge lies in the fact that usually only a small sample size (eight for example) is available due to the cost of sequencing. More needed.... \\
+where the first term can represent mean expression level and the second term can represent variance due to variation between biological replicates. However, quantifying biological variation has never been an easy task. The major challenge lies in the fact that usually only a small sample size (six for example, with 3 in experimental group and 3 in control group) is available due to the cost of sequencing. More needed.... \\
 
 
 
-In this paper, we focus on 20[number of dataset] experiments on \textit{arabidopsis thaliana} conducted by different research groups. For the purpose of identifying stably expressed genes, we fit a negative binomial model with a random term accounting for different experiments effect. We showed that.... In addition, we also found that different experiments share some information about the dispersion parameters. We are able to predict dispersion of one experiment by incorporating dispersion and mean from another experiment. 
+In this paper, we focus on 20[number of dataset] experiments on \textit{arabidopsis thaliana} conducted by different research groups. For the purpose of identifying stably expressed genes, we fit a negative binomial model with a random term accounting for different experiments effect. We showed that.... In addition, we also found that different experiments share some information about the dispersion parameters. We are able to predict dispersion of one experiment by regressing on dispersion and mean from other experiment datasets. The variance of dispersion which is assumed to be log-normally distributed is also evaluated. We showed further that, modelling approach has the merit of ... in regarding. 
 
+\section{Data Description}
+10\footnote{to be determined} \textit{arabidopsis thaliana} data sets are used in this paper.
 
+\section{methods}
+Negative binomial regression models are suggested for count data from RNA-Seq experiment{\color{green}{[Reference]}}, to account for over dispersion. However, since  GLM approaches are non-linear and require iterative fitting, a common issue is algorithmic failure for some genes in some datasets. \\
 
-
-\section{Estimating random effect in Negative Binomial Regression}
+\subsection{Negative binomial regression with random effect}
 There are various ways of presenting the negative binomial distribution, and a detailed explanation can be found in Hilbe(2007). It can be viewed as a Poisson-Gamma mixture, which means we assume that $Y$'s are Poisson distributed with mean $\mu$ following a Gamma distribution. The density function is then expressed as
 \[f(y; k,\mu)=\frac{\Gamma(y+ k)}{\Gamma(k)\Gamma(y + 1)}\times \left(\frac{k}{\mu + k }\right)^k\times\left(1- \frac{k}{\mu + k }\right)^y\]
 where $\Gamma(y+1)=(y+1)!$.\\ The mean and variance of $Y$ are given by
 \[E(Y)= \mu  ~~~~~~\text{Var}(Y)=\mu + \frac{\mu^2}{k}\]
-Note that by letting $\phi= 1/k$ where $\phi$ is usually recognized as dispersion parameter,  we can reexpress the variance as $\text{Var}(Y)= \mu + \phi\mu^2$
+Note that by letting $\phi= 1/k$ where $\phi$ is usually recognized as dispersion parameter,  we can reexpress the variance as $\text{Var}(Y)= \mu + \phi\mu^2$. We will stick to this notation from now on.
 
 \textbf{ Basic Setup of NB Regression}\\
-The NB regression is specified with three steps
+The NB regression is set up by three steps
 \begin{enumerate}
   \item $Y_i$ is negative binomial distributed with mean $\mu_i$ and dispersion parameter $\phi$.
-  \item the predictor is given by $\eta = X\alpha + Zb$, where $\alpha$ and $b$ are fixed and random effects, respectively. Suppose $b\sim N(0, \sigma^2)$
+  \item the predictor is given by $\eta = X\alpha + Zb$, where $\alpha$ and $b$ are fixed and random effects, respectively. In addition, we suppose $b\sim N(0, \sigma^2)$.
   \item there is a link between the mean $Y$ and predictor $\eta = g(\mu)$, by default glmmadmb uses ....
 \end{enumerate}
 
@@ -119,30 +126,53 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
   Let $\bm \theta =[\bm \phi, \bm \xi)]$ is of dimension $n$. Then we can make inference about $\bm\theta$ by the marginal likelihood funciton
   \[m(\bm \theta)= \prod_{i=1}^s\int p(\bm y_i|\bm X_i, \bm \phi, \bm u_i)q(\bm u_i|\bm \xi)d\bm u_i\]. Essentially we obtain $\hat{\bm \theta}$ by minimizing 
   $$f(\bm \theta)= -\log [m(\bm \theta)]$$
- Next we apply the NB regression setup here. For a particular gene $k$ (index suppressed here)
-  \[y_{ij} \sim NB(\mu_i, \phi), ~~ \eta_i = \log(\mu_i)= \log(R_jN_j)+\beta + e_i\]
-  where $e_i\sim N(0, \sigma^2)$ and $i, j$ index $j$th sample in $i$th group. {\color{blue}{not sure if normalization is needed yet, in which case we might begin with $\log(\mu_i)= \beta + \log (N_i R_i) + e_i$}}. The data set I analyze consists of 4 labs of arabidopsis experiment with 2 or 3 samples in each lab. That being said, I am assuming the means for different labs vary only in terms of random effect $e_i$.  {\color{blue} Note: for now we just assume $\phi$ is a constant within different samples for a particular gene.}
-  Note that $\bm \theta= (\beta, \sigma^2)$, and for SAS \verb"PROC NLMIXED" the NB $Y\sim \text{negbin}(n, p)$ log-likelihood is 
-  \[  l(n, p; y)= \log[\Gamma(n+y)]- \log[\Gamma(n)] - \log[\Gamma(y +1)] + n\log(p) + y\log(1-p)\]
-  \[E[Y] = kP = k\left(\frac{1-p}{p}\right), \text{Var}[Y] = kP(1-P) = k \left(\frac{1-p}{p}\right)\frac{1}{p}\] 
-  with $n \geq 0 , 0 <p < 1$. That is equivalent to $\mu = kP, k = 1/\phi$  under NB2 parameterization.  Therefore the $p(\cdot)$ can be written as 
-  \[p(y_i, p, k)= \frac{\Gamma(y+ k)}{\Gamma(k)\Gamma(y + 1)}\times p^k(1-p)^y\]
-  By noting $\mu_i= e^{\beta + e_i}= k(1-p)/p$ we have  
-  \[ p =  \frac{1}{k^{-1}e^{\beta  + e_i} + 1}\]
-  Subsequently
-  \[p(y_i| \beta, e_i, k)= \frac{\Gamma(y_i+ k)}{\Gamma(k)\Gamma(y_i + 1)}\times \left(\frac{1}{k^{-1}e^{\beta  + e_i} + 1}\right)^k\left(1-\frac{1}{k^{-1}e^{\beta  + e_i} + 1}\right)^{y_i}\]
-  Now that $e_i\sim N(0, \sigma^2)$ with $q(e_i|\sigma^2)= \frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{e_i^2}{2\sigma^2}\right)$ gives 
-    \[m(\beta, \sigma^2, k)=\prod_{i=1}^n\int p(y_i| \beta, e_i, k)q(e_i|\sigma^2)de_i\]  
-    \[=\prod_{i=1}^n\int\frac{\Gamma(y_i+ k)}{\Gamma(k)\Gamma(y_i + 1)}\times \left(\frac{1}{k^{-1}e^{\beta  + e_i} + 1}\right)^k\left(1-\frac{1}{k^{-1}e^{\beta  + e_i} + 1}\right)^{y_i}\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{e_i^2}{2\sigma^2}\right)de_i \]
+ Next we apply the NB regression setup here.
+ 	Let $i=1, \ldots, I$, and $j=1, \ldots, J$ index $i$th sample in $j$th group, respectively. For a particular gene $k$ 
+  \[Y_{kij} \sim NB(\mu_{kj}, \phi_k),\] 
+  \[\eta_{kj} = \log(\mu_{kj})= \log(R_jN_j)+\bm X\bm \beta + e_k\eqno(a)\]
+  or 
+  \[\eta_{kj} = \log(\mu_{kj})= \log(R_jN_j)+\beta_0 +\sum_{j=1}^J\bm z_j\bm b_j\eqno(b)\]
+  \[\phi_k = f(\bm \pi_{k}, \phi_{k'})\]
+  where $e_k\sim N(0, \sigma^2)$ in (a), or 
+\[\bm b_j \sim N(0, V_j)  ~~\text{and} ~~V_j = 
+	\sigma^2\left[
+ 	\begin{array}{ccc}
+ 	  1 &\rho_{12} & \rho_{13}\\
+ 	  \rho_{12} &1 & \rho_{23}\\
+ 	  \rho_{13} & \rho_{23} &1 \\
+\end{array} 		
+	\right]	
+	\]  
+	for a typical experiment of two treatment and 1 control group setting. {\color{blue}{Of course, we can also write (b) in matrix form, then $V$ would be diagonal block matrix. However, glmmADMB only allows "diagonal" or "full" (where all elements are estimated). SAS NLMIXED provides the option to specify covariance matrix, e.g.  \\
+	\verb"random b1 b2 b3 ~ normal([0,0,0],[g11,g21,g22,g31,g32,g33])" }}
+	
+	 $N_j$ is library size and $R_j$ are optimal normalization factors.
+  and $
+  \bm\pi_k=(\pi_{k1}, \pi_{k2}, \ldots, \pi_{kJ})$. $\phi_{k'}$ is the dispersion for the same gene from another group. %{\color{blue}{not sure if normalization is needed yet, in which case we might begin with $\log(\mu_i)= \beta + \log (N_i R_i) + e_i$}}. 
+  %The data set I analyze consists of 4 labs of arabidopsis experiment with 2 or 3 samples in each lab. That being said, I am assuming the means for different labs vary only in terms of random effect $e_i$.  {\color{blue} Note: for now we just assume $\phi$ is a constant within different samples for a particular gene.}
+  Note that $\bm \theta= (\bm \beta, \sigma^2)$, and
+  %and for SAS \verb"PROC NLMIXED" the NB $Y\sim \text{negbin}(n, p)$ log-likelihood is 
+ % \[  l(n, p; y)= \log[\Gamma(n+y)]- \log[\Gamma(n)] - \log[\Gamma(y +1)] + n\log(p) + y\log(1-p)\]
+ % \[E[Y] = kP = k\left(\frac{1-p}{p}\right), \text{Var}[Y] = kP(1-P) = k \left(\frac{1-p}{p}\right)\frac{1}{p}\] 
+%  with $n \geq 0 , 0 <p < 1$. That is equivalent to $\mu = kP, k = 1/\phi$  under NB2 parametrization.  Therefore the $p(\cdot)$ can be written as 
+ % \[p(y_i, p, k)= \frac{\Gamma(y+ k)}{\Gamma(k)\Gamma(y + 1)}\times p^k(1-p)^y\]
+  
+$\mu_{jk}= R_jN_je^{\beta + e_k}$ we have % = k(1-p)/p$ we have  
+ % \[ p =  \frac{1}{k^{-1}e^{\beta  + e_i} + 1}\]
+ % Subsequently
+  \[f(y_k| \beta, e_k, \phi_k)= \frac{\Gamma(y_k+ \phi_k^{-1})}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\times \left(\frac{1}{{\phi_k}R_jN_je^{\beta  + e_k} + 1}\right)^{\phi_k^{-1}}\left(1-\frac{1}{{\phi_k}R_jN_je^{\beta  + e_k} + 1}\right)^{y_k}\]
+  Now that $e_k\sim N(0, \sigma^2)$ with $q(e_k|\sigma^2)= \frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{e_k^2}{2\sigma^2}\right)$ gives 
+    \[m(\beta, \sigma^2, \phi_k)=\prod_{i=1}^n\int p(y_k| \beta, e_k, k)q(e_k|\sigma^2)de_k\]  
+    \[=\prod_{k=1}^K\int\frac{\Gamma(y_k+ k)}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\times \left(\frac{1}{\phi N_jR_je^{\beta  + e_k} + 1}\right)^{\phi_k^{-1}}\left(1-\frac{1}{\phi N_jR_je^{\beta  + e_k} + 1}\right)^{y_k}\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{e_k^2}{2\sigma^2}\right)de_k \]
   \textbf{2. Integration Approximation}\\
    \verb"PROC NLMIXED" uses \href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.55.99&rep=rep1&type=pdf}{adaptive Gaussian Quadrature (Pinheiro and Bates 1995)} while R Package \verb"glmmADMB" adopts Laplace Approximation (reference ???). According to SAS documentation, the latter is just a $1^{\text{st}}$ order special case of the former. 
-   Let $p(\beta, e_i) =\frac{1}{k^{-1}e^{\beta  + e_i} + 1}$, then rewriting $m(\beta, \sigma^2, k)$ gives 
-   \[m(\beta, \sigma^2, k) = \prod_{i=1}^n\frac{\Gamma(y_i+ k)}{\Gamma(k)\Gamma(y_i + 1)}\int p(\beta, e_i)^k(1-p(\beta, e_i))^{y_i}\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{e_i^2}{2\sigma^2}\right)~de_i\]  
-   \[= \prod_{i=1}^n\frac{\Gamma(y_i+ k)}{\Gamma(k)\Gamma(y_i + 1)}\int e^{k\log[p(\beta,e_i)]}e^{y_i\log[1-p(\beta, e_i)]} \frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{e_i^2}{2\sigma^2}\right)~de_i \]
-   \[=\prod_{i=1}^n\frac{\Gamma(y_i+ k)}{\Gamma(k)\Gamma(y_i + 1)}\frac{1}{\sqrt{2\pi\sigma^2}}\int \exp\left[k\log (p) + y_i\log(1-p) - \frac{e_i^2}{2\sigma^2}\right]~de_i\eqno(\ast)\]
+   Let $p_k = p(\beta, e_k) =\frac{1}{\phi_k N_jR_je^{\beta  + e_k} + 1}$, then rewriting $m(\beta, \sigma^2_k, \phi_k)$ gives 
+   \[m(\beta, \sigma^2_k, \phi_k) = \prod_{k=1}^K\frac{\Gamma(y_i+ \phi_k^{-1})}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\int [p(\beta, e_i)]^{\phi_k^{-1}}[1-p(\beta, e_k)]^{y_k}\frac{1}{\sqrt{2\pi\sigma^2_k}}\exp\left(-\frac{e_k^2}{2\sigma_k^2}\right)~de_k\]  
+   \[= \prod_{k=1}^K\frac{\Gamma(y_k+ \phi_k^{-1})}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\int e^{\phi_k^{-1}\log[p(\beta,e_k)]}e^{y_k\log[1-p(\beta, e_k)]} \frac{1}{\sqrt{2\pi\sigma_k^2}}\exp\left(-\frac{e_k^2}{2\sigma_k^2}\right)~de_k \]
+   \[=\prod_{k=1}^K\frac{\Gamma(y_k+ \phi_k^{-1})}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\frac{1}{\sqrt{2\pi\sigma^2_k}}\int \exp\left[\phi_k^{-1}\log (p_k) + y_k\log(1-p_k) - \frac{e_k^2}{2\sigma_k^2}\right]~de_k\eqno(\ast)\]
    The integral is approximated by Gaussian Quadrature. Denote
-    $$l(e_i, y_i)=k\log(p) + y_i\log(1-p)-\frac{e_i^2}{2\sigma^2}$$
-   Let $e_i^{\ast}$ maximizes $l(e_i, y_i)$., then  $(\ast)$ can be approximated by 
+    $$l(e_k, y_k)=\phi_k^{-1}\log(p_k) + y_i\log(1-p_k)-\frac{e_k^2}{2\sigma_k^2}$$
+   Let $e_k^{\ast}$ maximizes $l(e_k, y_k)$., then  $(\ast)$ can be approximated by 
    \[ \text{Gaussian Quadrature here}\]
    Can try
    \begin{verbatim}
@@ -151,6 +181,8 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
    to see how parameters are estimated in \verb"glmmADMB".\\
    It seems the \href{http://www.admb-project.org/documentation/manuals}{ADMB-RE} package (implementing random effects in nonlinear models) is also adaptive to non-normally distributed random effects and C++ programs are available. 
    SAS code for NB regression 
+   \subsection{Gamma regression and estimating variance of dispersion}
+   To explore the 
   %\begin{verbatim}
   % proc nlmixed;
   %    parms b0=1 b1=0 scale=14; /*initiating parameters*/
@@ -160,4 +192,7 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
   %    model y ~ gamma(scale,b);
   % run;
   %\end{verbatim}
+  \section{results}
+  \section{discussion}
+  \section{reference}
 \end{document}
