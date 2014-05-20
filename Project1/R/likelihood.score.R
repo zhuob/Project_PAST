@@ -38,7 +38,7 @@ likelihood.score <- function(data, pred, response, d, group)
                  poly(xx2, degree=deg) +
                  poly(xx6, degree=deg) + poly(xx7, degree=deg) +
                  poly(xx8, degree=deg) + poly(xx9, degree=deg)
-               + poly(pred, degree = 1), family=Gamma(link="log"))
+               + poly(log(pred), degree = 1), family=Gamma(link="log"))
     
     step <- stepAIC(fit, direction= "both") 
   }
