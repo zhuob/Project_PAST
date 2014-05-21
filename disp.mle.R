@@ -27,13 +27,13 @@ group9 <- c(1, 1, 1, 2, 2, 2)
 group0 <- c(1, 1, 1, 2, 2, 2)
 
 
-obj1 <- pi.disp.matrix(arab1, group1, tol.phi= 1e-9)
-obj2 <- pi.disp.matrix(arab2, group2, tol.phi= 1e-9)
-obj6 <- pi.disp.matrix(arab6, group6, tol.phi= 1e-9)
-obj7 <- pi.disp.matrix(arab7, group7, tol.phi= 1e-9)
-obj8 <- pi.disp.matrix(arab8, group8, tol.phi= 1e-9)
-obj9 <- pi.disp.matrix(arab9, group9, tol.phi= 1e-9)
-obj0 <- pi.disp.matrix(arab0, group0, tol.phi= 1e-9)
+obj1 <- pi.disp.matrix(arab1, group1, tol.phi= 1e-7)
+obj2 <- pi.disp.matrix(arab2, group2, tol.phi= 1e-7)
+obj6 <- pi.disp.matrix(arab6, group6, tol.phi= 1e-7)
+obj7 <- pi.disp.matrix(arab7, group7, tol.phi= 1e-7)
+obj8 <- pi.disp.matrix(arab8, group8, tol.phi= 1e-7)
+obj9 <- pi.disp.matrix(arab9, group9, tol.phi= 1e-7)
+obj0 <- pi.disp.matrix(arab0, group0, tol.phi= 1e-7)
 
 
 
@@ -45,10 +45,59 @@ obj0 <- pi.disp.matrix(arab0, group0, tol.phi= 1e-9)
 
 # system.time(sigma.0 <- estimate.dispersion.var(nb.da, dtt0, x = x))
 
-obj <- join_all(list(obj1, obj2, obj6, obj7, obj8, obj9, obj0), by= "Gene")
-obj <- mag[complete.cases(obj), ]
+obj <- join_all(list(obj1, obj6, obj7, obj8, obj9, obj0), by= "Gene")
+obj <- obj[complete.cases(obj), ]
+dim(obj)
 
-saveRDS(mag, "mag.rds")
+xx1  <- log(obj[, 3])
+xx6  <- log(obj[, 5])
+xx7  <- log(obj[, 7])
+xx8  <- log(obj[, 9])
+xx9  <- log(obj[, 11])
+xx0  <- log(obj[, 13])
+
+
+yy1 <- obj[, 2]
+yy6 <- obj[, 4]
+yy7 <- obj[, 6]
+yy8 <- obj[, 8]
+yy9 <- obj[, 10]
+yy0 <- obj[, 12]
+
+## the following has convergence issue
+# deg = 1
+# fit <- glm(yy0 ~ poly(xx0, degree = deg) + poly(xx1, degree=deg) +
+#              poly(xx6, degree=deg) + poly(xx7, degree=deg) +
+#              poly(xx8, degree=deg) + poly(xx9, degree=deg) 
+#            , family=Gamma(link="log"))
+
+fit2 <- glm(yy0~poly(xx0, degree= deg)+ poly(xx1, degree=deg)+poly(xx6, degree=deg)
+            + poly(xx7, degree=deg)+ poly(xx8, degree=deg), 
+            family=Gamma(link="log"))
+
+deg =2
+fit3 <- glm(yy0~poly(xx0, degree= deg)+ poly(xx7, degree=deg), 
+            family=Gamma(link="log"))
+
+summary(fit3)
+
+fit4 <- glm(yy0~poly(xx0, degree= deg)+ poly(xx7, degree=deg) + log(yy7), 
+            family=Gamma(link="log"))
+
+summary(fit4)
+
+lh1 <- likelihood.score(data= arab0, phi=fitted(fit3), dat1=obj, group=group0)
+lh2 <- likelihood.score(data= arab0, phi=fitted(fit4), dat1=obj, group=group0)
+
+sigma0 <- sigma.est(obj=lh1)
+sigma1 <- sigma.est(obi=lh2)
+
+
+
+
+
+
+
 setwd("/home/zhuob/Project2014/Project1/data")
 
 mag <- readRDS("mag.rds")

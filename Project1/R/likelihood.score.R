@@ -2,9 +2,8 @@
 ##' @title Calculating Likelihood Score and estimating the sigma^2
 ##' 
 ##' @param data  read counts matrix
-##' @param pred  predictor dispersion vector
-##' @param response  response dispersion vector
-##' @param d   poly degree to be fitted
+##' @param phi  fitted disperison from regression
+##' @param dat1 the combined dataset, used to merge with data
 ##' @param group a vector, indicating the group ids in \code{data}
 ##' 
 ##' @return a likelihood score
@@ -16,34 +15,9 @@
 
 
 
-likelihood.score <- function(data, pred, response, d, group)
-{
-  
-  y <- response
-  deg <- d
-  if (pred == "NULL")
-  {
-    fit <- glm(y ~ poly(xx0, degree = deg) + poly(xx1, degree=deg) +
-                 poly(xx2, degree=deg) +
-                 poly(xx6, degree=deg) + poly(xx7, degree=deg) +
-                 poly(xx8, degree=deg) + poly(xx9, degree=deg)
-               , family=Gamma(link="log"))
-    
-    step <- stepAIC(fit, direction= "both")
-  }
-  
-  else 
-  {
-    fit <- glm(y ~ poly(xx0, degree = deg) + poly(xx1, degree=deg) + 
-                 poly(xx2, degree=deg) +
-                 poly(xx6, degree=deg) + poly(xx7, degree=deg) +
-                 poly(xx8, degree=deg) + poly(xx9, degree=deg)
-               + poly(log(pred), degree = 1), family=Gamma(link="log"))
-    
-    step <- stepAIC(fit, direction= "both") 
-  }
-  
-  phi.hat <- fitted(step)
+likelihood.score <- function(data, phi, dat1, group)
+{  
+  phi.hat <- phi
   arab <- data
   arab <- create.geneColumn(arab)
   arab <- merge(arab, dat1, by= "Gene", all.y=T)[, 1:dim(arab)[2]]
