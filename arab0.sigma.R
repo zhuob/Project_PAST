@@ -33,3 +33,25 @@ points(xx0, log(ll0$phi[, 2]), pch=8, col="red")
 plot(xx1, log(yy0), pch=20, main="dipsersion est. by edgeR")
 points(xx1, log(ll0$phi[, 2]), pch=8, col="red")
 
+
+
+
+d.phi <- exp(d.step$s%*%d.step$par)
+dim(d.phi) = c(6, 116106/6)
+d.phi <- matrix(d.phi, 116106/6, 6)
+length(d.phi)
+head(d.phi, 10)
+
+
+d.step <- disp.step(nb.da$counts, eff.lib.sizes=nb.da$eff.lib.sizes, x = x)
+names(d.step)
+
+ds <- fit.nb.glm(nb.da, x)
+
+
+length(ds$phi)
+
+range(dispersion.0$estimates)
+plot(log(dispersion.0$estimates[,1]), log(ds$phi), pch=20)
+
+
