@@ -145,7 +145,7 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
 	\]  
 	for a typical experiment of two treatment and 1 control group setting. {\color{blue}{Of course, we can also write (b) in matrix form, then $V$ would be diagonal block matrix. However, glmmADMB only allows "diagonal" or "full" (where all elements are estimated). SAS NLMIXED provides the option to specify covariance matrix, e.g.  \\
 	\verb"random b1 b2 b3 ~ normal([0,0,0],[g11,g21,g22,g31,g32,g33])" }}
-	
+
 	 $N_j$ is library size and $R_j$ are optimal normalization factors.
   and $
   \bm\pi_k=(\pi_{k1}, \pi_{k2}, \ldots, \pi_{kJ})$. $\phi_{k'}$ is the dispersion for the same gene from another group. %{\color{blue}{not sure if normalization is needed yet, in which case we might begin with $\log(\mu_i)= \beta + \log (N_i R_i) + e_i$}}. 
@@ -181,8 +181,22 @@ $\mu_{jk}= R_jN_je^{\beta + e_k}$ we have % = k(1-p)/p$ we have
    to see how parameters are estimated in \verb"glmmADMB".\\
    It seems the \href{http://www.admb-project.org/documentation/manuals}{ADMB-RE} package (implementing random effects in nonlinear models) is also adaptive to non-normally distributed random effects and C++ programs are available. 
    SAS code for NB regression 
-   \subsection{Gamma regression and estimating variance of dispersion}
-   To explore the 
+   \subsection{Gamma regression and variance of dispersion}
+       In this section, we tried to evaluate dispersion models. The NBQ model[{\color{green}{reference}}] states that dispersion is a quadratic function of the relative mean $\pi_{kj}=\mu_{jk}/(N_jR_j)$
+   \[\log(\phi_{kj})= \alpha_0 + \alpha_1\pi_{jk} + \alpha_2(\pi_{jk})^2\]
+   Gu has showed that  when $\sigma^$ is under certain level, parametric based modelling approaches have advantage over genewise approaches, and thus are recommended. The aim of our analysis is to explore possible improvement if additional predictors are incorporated in the NBQ model. Specifically, we tried the following models
+   \[\log(\phi_{kj})= \alpha_0 + \sum_{l=1}^L[\alpha_{l1}\pi_{jk, l} + \alpha_{l2}(\pi_{jk, l})^2 
+   	\]
+   	and 
+   	\[\log(\phi_{kj,l'})= \alpha_0 + \sum_{l=1}^L[\alpha_{l1}\pi_{jk, l} + \alpha_{l2}(\pi_{jk, l})^2 + log(\phi_{kj, l''})   	\]
+   	where $l', l''\in \{1, 2, \ldots, L\}$ and $L$ is the number of labs available.\\
+	Actually we first tried Gamma regression models
+	\[\phi_{jk} \sim Gamma(\mu, \sigma), E[\phi_{jk}]=\mu,  \text{Var}[\phi_{jk}] = \sigma^2\]
+	with link function 
+	\[\log(\mu)=\beta_0 +\sum_{l=1}^L(\beta_{l1}[\log\pi_{jk, l}] + \beta_{l2}[\log\pi_{jk, l}]^2) + \epsilon\]
+	and $\epsilon\sim N(0, \sigma^2)$.
+	or adding corresponding dispersions from another dataset
+	\[\log(\mu)=\beta_0 +\sum_{l=1}^L(\beta_{l1}[\log\pi_{jk, l}] + \beta_{l2}[\log\pi_{jk, l}]^2) + \log(\phi){jk, l}) + \epsilon\]
   %\begin{verbatim}
   % proc nlmixed;
   %    parms b0=1 b1=0 scale=14; /*initiating parameters*/
