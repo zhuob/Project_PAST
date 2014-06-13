@@ -81,7 +81,7 @@
 \end{enumerate}
 
 \section{Introduction}
-RNA sequencing (RNA-Seq) has gained {\color{red}{\st{more and more}}} popularity in measuring gene  expression for the past few years. A variety of experiments  have been conducted in this routine for {\color{red}{\st{all kinds of purpose}}} different purposes, among which one major task is to detect differential expression (DE) genes. Several R packages (e.g., edgeR, DESeq2, NBPSeq)[{\color{green}{reference needed}}] are available to implement DE analysis for RNA-Seq data. The exponential growth of such routine generates a large number of count datasets, making comparison between different experiments possible. 
+RNA sequencing (RNA-Seq) has gained {\color{red}{\st{more and more}}} popularity in measuring gene  expression level for the past few years. A variety of experiments  have been conducted in this routine for {\color{red}{\st{all kinds of purpose}}} different purposes, among which one major task is to detect differential expression (DE) genes. Several R packages (e.g., edgeR, DESeq2, NBPSeq)[{\color{green}{reference needed}}] are available to implement DE analysis for RNA-Seq data. The exponential growth of such routine generates a large number of count datasets, making comparison between different experiments possible. 
 [from Translational signatures and mRNA...]
 Analysis of datasets of stably expressed genes would provide more accurate and reliable measurements of associations between variations of a specific gene characteristic and expression, and how distinct gene features work to optimize gene expression.
 
@@ -123,18 +123,18 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
   The observed data vector $\bm y_i$ for each $I$ subjects, $i=1, \ldots, s$ and $\bm y_i$ are assumed to be independent across $i$, but within-subject covariance is likely to exist because each of the elements of $\bm y_i$ is measured on the same subject( {\color{blue}{that implies it can deal with repeated measurement}}). The joint probability density function 
   \[p(\bm y_i|\bm X_i, \bm \phi, \bm u_i)q(\bm u_i|\bm \xi)\]
   where $\bm X_i$ is a matrix of observed explanatory variables and $\bm \phi, \bm \xi$ are vectors of unknown parameters.\\
-  Let $\bm \theta =[\bm \phi, \bm \xi)]$ is of dimension $n$. Then we can make inference about $\bm\theta$ by the marginal likelihood funciton
+  Let $\bm \theta =[\bm \phi, \bm \xi)]$ is of dimension $n$. Then we can make inference about $\bm\theta$ by the marginal likelihood function
   \[m(\bm \theta)= \prod_{i=1}^s\int p(\bm y_i|\bm X_i, \bm \phi, \bm u_i)q(\bm u_i|\bm \xi)d\bm u_i\]. Essentially we obtain $\hat{\bm \theta}$ by minimizing 
   $$f(\bm \theta)= -\log [m(\bm \theta)]$$
  Next we apply the NB regression setup here.
- 	Let $i=1, \ldots, I$, and $j=1, \ldots, J$ index $i$th sample in $j$th group, respectively. For a particular gene $k$ 
-  \[Y_{kij} \sim NB(\mu_{kj}, \phi_k),\] 
-  \[\eta_{kj} = \log(\mu_{kj})= \log(R_jN_j)+\bm X\bm \beta + e_k\eqno(a)\]
+ Let $Y_{ij}$ represents the number of RNA-Seq reads from biological sample $j$ attributed to gene $i$, for $i=1, \ldots, m$; $j=1, \ldots, n$. Let $N_j$ be the total number of genes for a particular biological sample $i$ (i.e., $N_j = \sum_{i=1}^m Y_{ij}$), which is usually referred to as \textit{library sizes} For a particular gene $i$ 
+  \[Y_{ij} \sim NB(\mu_{ij}, \phi_{ij}),\] 
+  where $\mu_{ij}$ is the mean and $\phi_{ij}$ is the dispersion parameter in the NB2 parametrization.  The link function for the mean
+  \[\eta_{ij} = \log(\mu_{ij})= \log(R_jN_j)+\beta_0 + e_{ij}\eqno(a)\]
   or 
-  \[\eta_{kj} = \log(\mu_{kj})= \log(R_jN_j)+\beta_0 +\sum_{j=1}^J\bm z_j\bm b_j\eqno(b)\]
-  \[\phi_k = f(\bm \pi_{k}, \phi_{k'})\]
-  where $e_k\sim N(0, \sigma^2)$ in (a), or 
-\[\bm b_j \sim N(0, V_j)  ~~\text{and} ~~V_j = 
+  \[\eta_{ij} = \log(\mu_{ij})= \log(R_jN_j)+\beta_0 +\bm Z\bm b\eqno(b)\]
+  where $R_j$s are optimal normalization factors, and $e_k\sim N(0, \sigma^2)$ in (a) if we assume a simple random effect , or in the context of covariance structure  
+\[\bm b \sim N(0, V)  ~~\text{and} ~~V = 
 	\sigma^2\left[
  	\begin{array}{ccc}
  	  1 &\rho_{12} & \rho_{13}\\
@@ -143,36 +143,44 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
 \end{array} 		
 	\right]	
 	\]  
-	for a typical experiment of two treatment and 1 control group setting. {\color{blue}{Of course, we can also write (b) in matrix form, then $V$ would be diagonal block matrix. However, glmmADMB only allows "diagonal" or "full" (where all elements are estimated). SAS NLMIXED provides the option to specify covariance matrix, e.g.  \\
-	\verb"random b1 b2 b3 ~ normal([0,0,0],[g11,g21,g22,g31,g32,g33])" }}
-
-	 $N_j$ is library size and $R_j$ are optimal normalization factors.
-  and $
-  \bm\pi_k=(\pi_{k1}, \pi_{k2}, \ldots, \pi_{kJ})$. $\phi_{k'}$ is the dispersion for the same gene from another group. %{\color{blue}{not sure if normalization is needed yet, in which case we might begin with $\log(\mu_i)= \beta + \log (N_i R_i) + e_i$}}. 
+	for a typical experiment of 3 biological sample setting [Not sure if this is exactly right]. If there are multiple labs, $V$ should be a diagonal block matrix, where each block represents a lab experiment. {\color{blue}{ However, glmmADMB only allows "diagonal" or "full" (where all elements are estimated). SAS NLMIXED does provide the option to specify covariance matrix, e.g.  \\
+	
+	\verb"random b1 b2 b3 ~ normal([0,0,0],[g11,g21,g22,g31,g32,g33])" }}\\
+	
+{\color{red}Unfortunately, it has convergence issue for a small sample size.} 
+%$\bm\pi_{j}=(\pi_{j1}, \pi_{j2}, \ldots, \pi_{kJ})$. $\phi_{k'}$ is the dispersion for the same gene from another group. %{\color{blue}{not sure if normalization is needed yet, in which case we might begin with $\log(\mu_i)= \beta + \log (N_i R_i) + e_i$}}. 
   %The data set I analyze consists of 4 labs of arabidopsis experiment with 2 or 3 samples in each lab. That being said, I am assuming the means for different labs vary only in terms of random effect $e_i$.  {\color{blue} Note: for now we just assume $\phi$ is a constant within different samples for a particular gene.}
-  Note that $\bm \theta= (\bm \beta, \sigma^2)$, and
+  Note that for a particular gene $i$,  $\bm \theta= (\beta_i, \sigma_i^2)$, and
   %and for SAS \verb"PROC NLMIXED" the NB $Y\sim \text{negbin}(n, p)$ log-likelihood is 
  % \[  l(n, p; y)= \log[\Gamma(n+y)]- \log[\Gamma(n)] - \log[\Gamma(y +1)] + n\log(p) + y\log(1-p)\]
  % \[E[Y] = kP = k\left(\frac{1-p}{p}\right), \text{Var}[Y] = kP(1-P) = k \left(\frac{1-p}{p}\right)\frac{1}{p}\] 
 %  with $n \geq 0 , 0 <p < 1$. That is equivalent to $\mu = kP, k = 1/\phi$  under NB2 parametrization.  Therefore the $p(\cdot)$ can be written as 
  % \[p(y_i, p, k)= \frac{\Gamma(y+ k)}{\Gamma(k)\Gamma(y + 1)}\times p^k(1-p)^y\]
-  
-$\mu_{jk}= R_jN_je^{\beta + e_k}$ we have % = k(1-p)/p$ we have  
+ $\mu_{ij}= R_jN_je^{\beta_i + e_{ij}}$ we have % = k(1-p)/p$ we have  
  % \[ p =  \frac{1}{k^{-1}e^{\beta  + e_i} + 1}\]
  % Subsequently
-  \[f(y_k| \beta, e_k, \phi_k)= \frac{\Gamma(y_k+ \phi_k^{-1})}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\times \left(\frac{1}{{\phi_k}R_jN_je^{\beta  + e_k} + 1}\right)^{\phi_k^{-1}}\left(1-\frac{1}{{\phi_k}R_jN_je^{\beta  + e_k} + 1}\right)^{y_k}\]
-  Now that $e_k\sim N(0, \sigma^2)$ with $q(e_k|\sigma^2)= \frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{e_k^2}{2\sigma^2}\right)$ gives 
-    \[m(\beta, \sigma^2, \phi_k)=\prod_{i=1}^n\int p(y_k| \beta, e_k, k)q(e_k|\sigma^2)de_k\]  
-    \[=\prod_{k=1}^K\int\frac{\Gamma(y_k+ k)}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\times \left(\frac{1}{\phi N_jR_je^{\beta  + e_k} + 1}\right)^{\phi_k^{-1}}\left(1-\frac{1}{\phi N_jR_je^{\beta  + e_k} + 1}\right)^{y_k}\frac{1}{\sqrt{2\pi\sigma^2}}\exp\left(-\frac{e_k^2}{2\sigma^2}\right)de_k \]
+
+\[f(y_{ij}| \beta_i, e_{ij}, \phi_i)\]
+\[= \frac{\Gamma(y_{ij}+ \phi_i^{-1})}{\Gamma(\phi_i^{-1})\Gamma(y_{ij} + 1)}\times \left(\frac{1}{\phi_iR_jN_j\exp(\beta_i  + e_{ij}) + 1}\right)^{\phi_i^{-1}}\left(1-\frac{1}{\phi_iR_jN_j\exp(\beta_i  + e_{ij}) + 1}\right)^{y_{ij}}\]
+
+
+  Now that $e_{ij}\sim N(0, \sigma_i^2)$ with $q(e_{ij}|\sigma_i^2)= \frac{1}{\sqrt{2\pi\sigma_i^2}}\exp\left(-\frac{e_{ij}^2}{2\sigma_i^2}\right)$ gives 
+    \[m(\beta_i, \sigma_i^2, \phi_i)=\prod_{j=1}^n\int p(y_{ij}| \beta_i, e_{ij}, \phi_i)q(e_{ij}|\sigma_i^2)de_{ij}\]  
+    \[=\prod_{j= 1}^n\int\frac{\Gamma(y_{ij}+ {\phi_i}^{-1})}{\Gamma(\phi_i^{-1})\Gamma(y_{ij} + 1)}\times \left(\frac{1}{\phi_i N_jR_je^{\beta_i  + e_{ij}} + 1}\right)^{\phi_i^{-1}}\left(1-\frac{1}{\phi_i N_jR_je^{\beta_i  + e_{ij}} + 1}\right)^{y_{ij}} \]
+    \[\times \frac{1}{\sqrt{2\pi\sigma_i^2}}\exp\left(-\frac{e_{ij}^2}{2\sigma_i^2}\right)de_{ij} \]
   \textbf{2. Integration Approximation}\\
-   \verb"PROC NLMIXED" uses \href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.55.99&rep=rep1&type=pdf}{adaptive Gaussian Quadrature (Pinheiro and Bates 1995)} while R Package \verb"glmmADMB" adopts Laplace Approximation (reference ???). According to SAS documentation, the latter is just a $1^{\text{st}}$ order special case of the former. 
-   Let $p_k = p(\beta, e_k) =\frac{1}{\phi_k N_jR_je^{\beta  + e_k} + 1}$, then rewriting $m(\beta, \sigma^2_k, \phi_k)$ gives 
-   \[m(\beta, \sigma^2_k, \phi_k) = \prod_{k=1}^K\frac{\Gamma(y_i+ \phi_k^{-1})}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\int [p(\beta, e_i)]^{\phi_k^{-1}}[1-p(\beta, e_k)]^{y_k}\frac{1}{\sqrt{2\pi\sigma^2_k}}\exp\left(-\frac{e_k^2}{2\sigma_k^2}\right)~de_k\]  
-   \[= \prod_{k=1}^K\frac{\Gamma(y_k+ \phi_k^{-1})}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\int e^{\phi_k^{-1}\log[p(\beta,e_k)]}e^{y_k\log[1-p(\beta, e_k)]} \frac{1}{\sqrt{2\pi\sigma_k^2}}\exp\left(-\frac{e_k^2}{2\sigma_k^2}\right)~de_k \]
-   \[=\prod_{k=1}^K\frac{\Gamma(y_k+ \phi_k^{-1})}{\Gamma(\phi_k^{-1})\Gamma(y_k + 1)}\frac{1}{\sqrt{2\pi\sigma^2_k}}\int \exp\left[\phi_k^{-1}\log (p_k) + y_k\log(1-p_k) - \frac{e_k^2}{2\sigma_k^2}\right]~de_k\eqno(\ast)\]
+   \verb"PROC NLMIXED" uses \href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.55.99&rep=rep1&type=pdf}{adaptive Gaussian Quadrature (Pinheiro and Bates 1995)} while R Package \verb"glmmADMB" adopts Laplace Approximation (reference ???). According to SAS documentation, the latter is just a $1^{\text{st}}$ order special case of the former. \\   
+   
+   For each particular gene $i$, let $p_{i} = p(\beta_i, e_{ij}) =\frac{1}{\phi_i N_jR_je^{\beta_i  + e_{ij}} + 1}$, then rewriting $m(\beta_i, \sigma^2_i, \phi_i)$ gives 
+\begin{align*}
+  & m(\beta_i, \sigma^2_i, \phi_i) \\
+   &= \prod_{j=1}^n\frac{\Gamma(y_{ij}+ \phi_i^{-1})}{\Gamma(\phi_i^{-1})\Gamma(y_{ij} + 1)}\int [p(\beta_i, e_{ij})]^{\phi_i^{-1}}[1-p(\beta_i, e_{ij})]^{y_{ij}}\frac{1}{\sqrt{2\pi\sigma^2_i}}\exp\left(-\frac{e_{ij}^2}{2\sigma_i^2}\right)~de_{ij}  \\
+   &= \prod_{j=1}^n\frac{\Gamma(y_{ij}+ \phi_i{-1})}{\Gamma(\phi_i^{-1})\Gamma(y_{ij} + 1)}\int e^{\phi_i^{-1}\log[p(\beta_i,e_{ij})]}e^{y_{ij}\log[1-p(\beta_i, e_{ij})]} \frac{1}{\sqrt{2\pi\sigma_i^2}}\exp\left(-\frac{e_{ij}^2}{2\sigma_i^2}\right)~de_{ij} \\ 
+   & =\prod_{j=1}^n\frac{\Gamma(y_{ij}+ \phi_i^{-1})}{\Gamma(\phi_i^{-1})\Gamma(y_{ij} + 1)}\frac{1}{\sqrt{2\pi\sigma^2_i}}\int \exp\left[\phi_i^{-1}\log (p_{i}) + y_{ij}\log(1-p_{i}) - \frac{e_{ij}^2}{2\sigma_i^2}\right]~de_{ij}
+\end{align*}
    The integral is approximated by Gaussian Quadrature. Denote
-    $$l(e_k, y_k)=\phi_k^{-1}\log(p_k) + y_i\log(1-p_k)-\frac{e_k^2}{2\sigma_k^2}$$
-   Let $e_k^{\ast}$ maximizes $l(e_k, y_k)$., then  $(\ast)$ can be approximated by 
+    $$l(e_{ij}, y_{ij})=\phi_i^{-1}\log(p_{i}) + y_{ij}\log(1-p_{i})-\frac{e_{ij}^2}{2\sigma_i^2}$$
+   Let $e_{ij}^{\ast}$ maximizes $l(e_{ij}, y_{ij})$., then  $(\ast)$ can be approximated by 
    \[ \text{Gaussian Quadrature here}\]
    Can try
    \begin{verbatim}
@@ -180,18 +188,46 @@ $\mu_{jk}= R_jN_je^{\beta + e_k}$ we have % = k(1-p)/p$ we have
    \end{verbatim}
    to see how parameters are estimated in \verb"glmmADMB".\\
    It seems the \href{http://www.admb-project.org/documentation/manuals}{ADMB-RE} package (implementing random effects in nonlinear models) is also adaptive to non-normally distributed random effects and C++ programs are available. 
-   SAS code for NB regression 
+   SAS code for NB regression.\\
+   
+   \textbf{Now Back to Question 1} we wanted to address.  In this regression setting, we obtain a vector of $m$ $\sigma^2$s for a total of $m$ genes. We would expect smaller $\sigma^2$ for genes that are stably expressed. The problem reduces to choose a threshold of $\sigma^2_0$, then genes with $<\sigma^2_0$ will be identified as stably expressed. 
    \subsection{Gamma regression and variance of dispersion}
-       In this section, we tried to evaluate dispersion models. The NBQ model[{\color{green}{reference}}] states that dispersion is a quadratic function of the relative mean $\pi_{kj}=\mu_{jk}/(N_jR_j)$
-   \[\log(\phi_{kj})= \alpha_0 + \alpha_1\pi_{jk} + \alpha_2(\pi_{jk})^2\]
-   Gu has showed that  when $\sigma^$ is under certain level, parametric based modelling approaches have advantage over genewise approaches, and thus are recommended. The aim of our analysis is to explore possible improvement if additional predictors are incorporated in the NBQ model. Specifically, we tried the following models
-   \[\log(\phi_{kj})= \alpha_0 + \sum_{l=1}^L[\alpha_{l1}\pi_{jk, l} + \alpha_{l2}(\pi_{jk, l})^2 
-   	\]
+       In this section, we tried to evaluate dispersion models. The NBQ model[{\color{green}{reference}}] states that dispersion is a quadratic function of the relative mean $\pi_{ij}=\mu_{ij}/(N_jR_j)$
+   \[\log(\phi_{ij})= \alpha_0 + \alpha_1\log[\pi_{ij}] + \alpha_2(\log[\pi_{ij}])^2\]
+  A natural extension of the model is to add a term quantifying the "noise" for dispersion, that is, the "true" logged dispersion is normally distributed. 
+  \begin{verbatim}
+  > head(arab)
+          mock1 mock2 mock3 hrcc1 hrcc2 hrcc3
+AT1G01010    35    77    40    46    64    60
+AT1G01020    43    45    32    43    39    49
+AT1G01030    16    24    26    27    35    20
+AT1G01040    72    43    64    66    25    90
+AT1G01050    49    78    90    67    45    60
+AT1G01060     0    15     2     0    21     8
+
+> head(pf$estimates)
+          [,1]      [,2]      [,3]      [,4]      [,5]      [,6]
+[1,] 0.1879878 0.1879878 0.1879878 0.1747160 0.1747160 0.1747160
+[2,] 0.2113727 0.2113727 0.2113727 0.2019324 0.2019324 0.2019324
+[3,] 0.3121561 0.3121561 0.3121561 0.2513636 0.2513636 0.2513636
+[4,] 0.1760997 0.1760997 0.1760997 0.1821039 0.1821039 0.1821039
+[5,] 0.1642851 0.1642851 0.1642851 0.1778045 0.1778045 0.1778045
+[6,] 0.9426165 0.9426165 0.9426165 0.5257880 0.5257880 0.5257880
+  \end{verbatim}
+  \[\log(\phi_{ij})= \log(\phi^0_{ij})+ \epsilon_{ij}\]
+  where $\phi^0_{ij}$s is obtained by fitting NBQ model $\epsilon_{ij}$ is assumed to be $N(0, \sigma^2)$. \\
+  
+   Gu has showed that  when $\sigma^2$ is below certain level, parametric based modelling approaches have advantage over non-parametric approaches (e.g. genewise in \verb"edgeR"). The aim of our analysis is to explore possible improvement if additional predictors are incorporated in the parametric dispersion model. Specifically, we tried the following models
+   \begin{enumerate}
+   \item The true dispersion is a function of relative means, but 
+   \[\log(\phi_{ij})= \alpha_0 + \sum_{j=1}^n(\alpha_{l1}\pi_{ij} + \alpha_{l2}[\pi_{jk, l}]^2) + \epsilon_{kj} \]
+   \end{enumerate}
+
    	and 
-   	\[\log(\phi_{kj,l'})= \alpha_0 + \sum_{l=1}^L[\alpha_{l1}\pi_{jk, l} + \alpha_{l2}(\pi_{jk, l})^2 + log(\phi_{kj, l''})   	\]
+   	\[\log(\phi_{kj,l'})= \alpha_0 + \sum_{l=1}^L[\alpha_{l1}\pi_{jk, l} + \alpha_{l2}(\pi_{jk, l})^2] + log(\phi_{kj, l''})   	\]
    	where $l', l''\in \{1, 2, \ldots, L\}$ and $L$ is the number of labs available.\\
 	Actually we first tried Gamma regression models
-	\[\phi_{jk} \sim Gamma(\mu, \sigma), E[\phi_{jk}]=\mu,  \text{Var}[\phi_{jk}] = \sigma^2\]
+	\[\phi_{jk} \sim \text{Gamma}(\mu, \sigma), E[\phi_{jk}]=\mu,  \text{Var}[\phi_{jk}] = \sigma^2\]
 	with link function 
 	\[\log(\mu)=\beta_0 +\sum_{l=1}^L(\beta_{l1}[\log\pi_{jk, l}] + \beta_{l2}[\log\pi_{jk, l}]^2) + \epsilon\]
 	and $\epsilon\sim N(0, \sigma^2)$.
