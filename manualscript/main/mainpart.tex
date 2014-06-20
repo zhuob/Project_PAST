@@ -69,41 +69,55 @@
 \begin{document}
 \maketitle
 
-\textbf{\href{http://writingcenter.unc.edu/handouts/introductions/}{Tips}}
-\begin{enumerate}
-\item Start by thinking about the question (or questions) you are trying to answer.
-\item Decide how general or broad your opening should be.
-\item Try writing your introduction last.
-\item Don't be afraid to write a tentative introduction first and then change it later.
-\item Open with an attention grabber. 
-\item Pay special attention to your first sentence. 
-\item Be straightforward and confident.
-\end{enumerate}
+%\textbf{\href{http://writingcenter.unc.edu/handouts/introductions/}{Tips}}
+%\begin{enumerate}
+%\item Start by thinking about the question (or questions) you are trying to answer.
+%\item Decide how general or broad your opening should be.
+%\item Try writing your introduction last.
+%\item Don't be afraid to write a tentative introduction first and then change it later.
+%\item Open with an attention grabber. 
+%\item Pay special attention to your first sentence. 
+%\item Be straightforward and confident.
+%\end{enumerate}
 
 \section{Introduction}
 RNA sequencing (RNA-Seq) has gained {\color{red}{\st{more and more}}} popularity in measuring gene  expression level for the past few years. A variety of experiments  have been conducted in this routine for {\color{red}{\st{all kinds of purpose}}} different purposes, among which one major task is to detect differential expression (DE) genes. Several R packages (e.g., edgeR, DESeq2, NBPSeq)[{\color{green}{reference needed}}] are available to implement DE analysis for RNA-Seq data. The exponential growth of such routine generates a large number of count datasets, making comparison between different experiments possible. 
 [from Translational signatures and mRNA...]
 Analysis of datasets of stably expressed genes would provide more accurate and reliable measurements of associations between variations of a specific gene characteristic and expression, and how distinct gene features work to optimize gene expression.
 
-It is therefore interesting to ask, for a specific species, whether there is similarity or dissimilarity across experiments. This motivates us to propose several interesting questions. First, whether there are some genes stably expressed despite various experimental conditions; Second, whether there is any commonality between the mean and dispersion across different experiments. We hope by answering these questions, we're able to provide a better perspective to look at normalization issue, as well as modelling approach of mean and dispersion\footnote{we haven't brought up NB distribution yet}. \\
 
-
-Although statistical models vary from one to another, it is widely assumed that gene counts follow a Negative Binomial (NB) distribution [{\color{green}{reference needed}}]. This assumption has the advantage of capturing both the expression level (mean $\mu$) and biological variation (dispersion parameter $\phi$). The variance of NB distribution depends on the mean in the form of 
+It is therefore interesting to ask, for a specific species, whether there is similarity or dissimilarity across experiments. This motivates us to propose several interesting questions. First, whether there are some genes stably expressed despite various experimental conditions. Identifying stably expressed genes is an important approach to understand the mechanism in cancer  and oncology study. By removing those stably expressed genes, researchers are able to locate mutated genes in a narrowed scope.
+The second question has to do with Negative Binomial modeling of RNA-Seq data. Although statistical models vary from one to another, it is widely assumed that gene counts follow a Negative Binomial (NB) distribution [{\color{green}{reference needed}}]. This assumption has the advantage of capturing both the expression level (mean $\mu$) and biological variation (dispersion parameter $\phi$). The variance of NB distribution depends on the mean in the form of 
 \[\text{Var}= \mu +\mu^2\phi\eqno(1.1)\]
-where the first term can represent mean expression level and the second term can represent variance due to variation between biological replicates. However, quantifying biological variation has never been an easy task. The major challenge lies in the fact that usually only a small sample size (six for example, with 3 in experimental group and 3 in control group) is available due to the cost of sequencing. More needed.... \\
+where the first term quantifies mean expression level and the second term represents variation between biological replicates.  The dispersion $\phi$ is a nuisance parameter in testing DE, but estimation of it is nevertheless essential for valid statistical inference.   In a typical RNA-Seq experiment, the fact that a large number of genes (usually 20k-30k) combined with a small sample size (e.g. less than 10) makes estimating dispersion really matter.  Assuming a common dispersion parameter across all genes fails to capture the trend between dispersion and relative gene abundance, and is therefore, over simplified.  On the other hand, a gene-wise dispersion model suffers from losing power due to the need to estimate too many nuisance parameters.  A compromise strategy is to use moderate degree of dispersion shrinkage (e.g. NBQ , DSS, Tagwise APL), by relating dispersion to some measure of expression level, in the form of parametric or non-parametric function.  An adequately specified  dispersion model can lead to considerable power saving.  While emperical evidence suggests that a general trend does exist in mean and dispersion level, $\phi$'s  cannot be expected to exactly follow this trend. Di \text{et. al.}  (or DSS) proposed to use an extra term $\epsilon$ to capture extra variation not explained by dispersion models. Specifically, Di suggests $\log (\phi_{ij})= f(\alpha_{ij}, \pi_{ij}) + \epsilon_{ij}$, where $i$ indexes gene, $j$ indexes biological replicates and $\epsilon\sim N(0, \sigma^2)$. Intuitively, a modeling approach is appropriate  [{\color{green} reference needed}] if the "indicator", $\sigma^2$, is below certain level. Then the next question to be asked is,  whether there is any commonality between the mean and dispersion across different experiments. 
+
+ 
+ 
+  We hope by answering these questions, we're able to provide a new perspective to look at normalization issue, as well as modelling approach of mean and dispersion.
 
 
 
-In this paper, we focus on 20[number of dataset] experiments on \textit{arabidopsis thaliana} conducted by different research groups. For the purpose of identifying stably expressed genes, we fit a negative binomial model with a random term accounting for different experiments effect. We showed that.... In addition, we also found that different experiments share some information about the dispersion parameters. We are able to predict dispersion of one experiment by regressing on dispersion and mean from other experiment datasets. The variance of dispersion which is assumed to be log-normally distributed is also evaluated. We showed further that, modelling approach has the merit of ... in regarding. 
+
+
+
+In this paper, we focus on 20 [number of dataset] experiments on \textit{arabidopsis thaliana} conducted by different research groups. For the purpose of identifying stably expressed genes, we fit a negative binomial regerssion model with a random term accounting for different experiments effect. \\
+For the purpose of improving modeling approach, 
+We showed that.... In addition, we also found that different experiments share some information about the dispersion parameters. 
+
+We are able to reduce residual variation of dispersion in one experiment by including abundancy level of other experiments. We found that .....
 
 \section{Data Description}
-10\footnote{to be determined} \textit{arabidopsis thaliana} data sets are used in this paper.
+10\footnote{to be determined} \textit{arabidopsis thaliana} data sets are used in this paper. 
+\[\text{[Description of experiments here]}\]
 
 \section{methods}
 Negative binomial regression models are suggested for count data from RNA-Seq experiment{\color{green}{[Reference]}}, to account for over dispersion. However, since  GLM approaches are non-linear and require iterative fitting, a common issue is algorithmic failure for some genes in some datasets. \\
 
 \subsection{Negative binomial regression with random effect}
-There are various ways of presenting the negative binomial distribution, and a detailed explanation can be found in Hilbe(2007). It can be viewed as a Poisson-Gamma mixture, which means we assume that $Y$'s are Poisson distributed with mean $\mu$ following a Gamma distribution. The density function is then expressed as
+There are various ways of presenting the negative binomial distribution, and a detailed explanation can be found in Hilbe(2007). It can be viewed as a Poisson-Gamma mixture, which means we assume that $Y$'s are Poisson distributed with mean $\mu$ following a Gamma distribution. That is,
+\[Y|\mu \sim \text{Poisson}(\mu)\]
+\[\mu|\alpha, \beta \sim \text{Gamma}(\alpha, \beta)\]
+ The density function of $Y$ is then expressed as
 \[f(y; k,\mu)=\frac{\Gamma(y+ k)}{\Gamma(k)\Gamma(y + 1)}\times \left(\frac{k}{\mu + k }\right)^k\times\left(1- \frac{k}{\mu + k }\right)^y\]
 where $\Gamma(y+1)=(y+1)!$.\\ The mean and variance of $Y$ are given by
 \[E(Y)= \mu  ~~~~~~\text{Var}(Y)=\mu + \frac{\mu^2}{k}\]
@@ -126,6 +140,8 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
   Let $\bm \theta =[\bm \phi, \bm \xi)]$ is of dimension $n$. Then we can make inference about $\bm\theta$ by the marginal likelihood function
   \[m(\bm \theta)= \prod_{i=1}^s\int p(\bm y_i|\bm X_i, \bm \phi, \bm u_i)q(\bm u_i|\bm \xi)d\bm u_i\]. Essentially we obtain $\hat{\bm \theta}$ by minimizing 
   $$f(\bm \theta)= -\log [m(\bm \theta)]$$
+  {\color{green} Do I really need the above paragraph?} //
+  
  Next we apply the NB regression setup here.
  Let $Y_{ij}$ represents the number of RNA-Seq reads from biological sample $j$ attributed to gene $i$, for $i=1, \ldots, m$; $j=1, \ldots, n$. Let $N_j$ be the total number of genes for a particular biological sample $i$ (i.e., $N_j = \sum_{i=1}^m Y_{ij}$), which is usually referred to as \textit{library sizes} For a particular gene $i$ 
   \[Y_{ij} \sim NB(\mu_{ij}, \phi_{ij}),\] 
@@ -133,7 +149,7 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
   \[\eta_{ij} = \log(\mu_{ij})= \log(R_jN_j)+\beta_0 + e_{ij}\eqno(a)\]
   or 
   \[\eta_{ij} = \log(\mu_{ij})= \log(R_jN_j)+\beta_0 +\bm Z\bm b\eqno(b)\]
-  where $R_j$s are optimal normalization factors, and $e_k\sim N(0, \sigma^2)$ in (a) if we assume a simple random effect , or in the context of covariance structure  
+  where $R_j$s are optimal normalization factors, and $e_{ij}\sim N(0, \sigma^2_i)$ in (a) if we assume a simple random effect , or in the context of covariance structure  
 \[\bm b \sim N(0, V)  ~~\text{and} ~~V = 
 	\sigma^2\left[
  	\begin{array}{ccc}
@@ -160,14 +176,19 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
  % \[ p =  \frac{1}{k^{-1}e^{\beta  + e_i} + 1}\]
  % Subsequently
 
-\[f(y_{ij}| \beta_i, e_{ij}, \phi_i)\]
-\[= \frac{\Gamma(y_{ij}+ \phi_i^{-1})}{\Gamma(\phi_i^{-1})\Gamma(y_{ij} + 1)}\times \left(\frac{1}{\phi_iR_jN_j\exp(\beta_i  + e_{ij}) + 1}\right)^{\phi_i^{-1}}\left(1-\frac{1}{\phi_iR_jN_j\exp(\beta_i  + e_{ij}) + 1}\right)^{y_{ij}}\]
+\begin{align*}
+&f(y_{ij}| \beta_i, e_{ij}, \phi_i) \\
+& = \frac{\Gamma(y_{ij}+ \phi_i^{-1})}{\Gamma(\phi_i^{-1})\Gamma(y_{ij} + 1)}\times \left(\frac{1}{\phi_iR_jN_j\exp(\beta_i  + e_{ij}) + 1}\right)^{\phi_i^{-1}}\left(1-\frac{1}{\phi_iR_jN_j\exp(\beta_i  + e_{ij}) + 1}\right)^{y_{ij}}\\
+\end{align*}
 
 
   Now that $e_{ij}\sim N(0, \sigma_i^2)$ with $q(e_{ij}|\sigma_i^2)= \frac{1}{\sqrt{2\pi\sigma_i^2}}\exp\left(-\frac{e_{ij}^2}{2\sigma_i^2}\right)$ gives 
-    \[m(\beta_i, \sigma_i^2, \phi_i)=\prod_{j=1}^n\int p(y_{ij}| \beta_i, e_{ij}, \phi_i)q(e_{ij}|\sigma_i^2)de_{ij}\]  
-    \[=\prod_{j= 1}^n\int\frac{\Gamma(y_{ij}+ {\phi_i}^{-1})}{\Gamma(\phi_i^{-1})\Gamma(y_{ij} + 1)}\times \left(\frac{1}{\phi_i N_jR_je^{\beta_i  + e_{ij}} + 1}\right)^{\phi_i^{-1}}\left(1-\frac{1}{\phi_i N_jR_je^{\beta_i  + e_{ij}} + 1}\right)^{y_{ij}} \]
-    \[\times \frac{1}{\sqrt{2\pi\sigma_i^2}}\exp\left(-\frac{e_{ij}^2}{2\sigma_i^2}\right)de_{ij} \]
+  \begin{align*}
+    & m(\beta_i, \sigma_i^2, \phi_i)=\prod_{j=1}^n\int p(y_{ij}| \beta_i, e_{ij}, \phi_i)q(e_{ij}|\sigma_i^2)de_{ij} \\
+    &=\prod_{j= 1}^n\int\frac{\Gamma(y_{ij}+ {\phi_i}^{-1})}{\Gamma(\phi_i^{-1})\Gamma(y_{ij} + 1)}\times \left(\frac{1}{\phi_i N_jR_je^{\beta_i  + e_{ij}} + 1}\right)^{\phi_i^{-1}}\left(1-\frac{1}{\phi_i N_jR_je^{\beta_i  + e_{ij}} + 1}\right)^{y_{ij}} \\
+    &\times \frac{1}{\sqrt{2\pi\sigma_i^2}}\exp\left(-\frac{e_{ij}^2}{2\sigma_i^2}\right)de_{ij} \\
+  \end{align*}
+
   \textbf{2. Integration Approximation}\\
    \verb"PROC NLMIXED" uses \href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.55.99&rep=rep1&type=pdf}{adaptive Gaussian Quadrature (Pinheiro and Bates 1995)} while R Package \verb"glmmADMB" adopts Laplace Approximation (reference ???). According to SAS documentation, the latter is just a $1^{\text{st}}$ order special case of the former. \\   
    
@@ -181,51 +202,56 @@ For  \href{http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default
    The integral is approximated by Gaussian Quadrature. Denote
     $$l(e_{ij}, y_{ij})=\phi_i^{-1}\log(p_{i}) + y_{ij}\log(1-p_{i})-\frac{e_{ij}^2}{2\sigma_i^2}$$
    Let $e_{ij}^{\ast}$ maximizes $l(e_{ij}, y_{ij})$., then  $(\ast)$ can be approximated by 
-   \[ \text{Gaussian Quadrature here}\]
-   Can try
-   \begin{verbatim}
-   file.show(system.file("tpl","glmmadmb.tpl",package="glmmADMB"))" 
-   \end{verbatim}
-   to see how parameters are estimated in \verb"glmmADMB".\\
+   a Gaussian Quadrature.
+%   Can try
+%   \begin{verbatim}
+%   file.show(system.file("tpl","glmmadmb.tpl",package="glmmADMB"))" 
+%   \end{verbatim}
+%   to see how parameters are estimated in \verb"glmmADMB".\\
    It seems the \href{http://www.admb-project.org/documentation/manuals}{ADMB-RE} package (implementing random effects in nonlinear models) is also adaptive to non-normally distributed random effects and C++ programs are available. 
-   SAS code for NB regression.\\
+  % SAS code for NB regression.\\
    
    \textbf{Now Back to Question 1} we wanted to address.  In this regression setting, we obtain a vector of $m$ $\sigma^2$s for a total of $m$ genes. We would expect smaller $\sigma^2$ for genes that are stably expressed. The problem reduces to choose a threshold of $\sigma^2_0$, then genes with $<\sigma^2_0$ will be identified as stably expressed. 
-   \subsection{Gamma regression and variance of dispersion}
-       In this section, we tried to evaluate dispersion models. The NBQ model[{\color{green}{reference}}] states that dispersion is a quadratic function of the relative mean $\pi_{ij}=\mu_{ij}/(N_jR_j)$
-   \[\log(\phi_{ij})= \alpha_0 + \alpha_1\log[\pi_{ij}] + \alpha_2(\log[\pi_{ij}])^2\]
-  A natural extension of the model is to add a term quantifying the "noise" for dispersion, that is, the "true" logged dispersion is normally distributed. 
-  \begin{verbatim}
-  > head(arab)
-          mock1 mock2 mock3 hrcc1 hrcc2 hrcc3
-AT1G01010    35    77    40    46    64    60
-AT1G01020    43    45    32    43    39    49
-AT1G01030    16    24    26    27    35    20
-AT1G01040    72    43    64    66    25    90
-AT1G01050    49    78    90    67    45    60
-AT1G01060     0    15     2     0    21     8
+   \subsection{Gamma regression and residual variation of dispersion}
+       As discussed in the Introduction section, we assume the residuals generated from the dispersion model follow a normal distribution: 	$\epsilon = \log(\phi) - \log(\hat{\phi}) \sim N(0, \sigma^2)$.  The details of estimating $\sigma^2$ can be found in Mi 2014 and is thus omitted here. The NBQ model[{\color{green}{reference}}] uses estimated mean relative frequencies $\hat{\pi}_{ij}$ as predictors, where $\pi_{ij}=\mu_{ij}/(N_jR_j)$.  In Mi's work, the NBQ model with a random term quantifying residuals of dispersion is expressed as below:
+   \[\log(\phi_{ij})= \alpha_0 + \alpha_1\log[\pi_{ij}] + \alpha_2(\log[\pi_{ij}])^2 + \epsilon_{ij} \eqno(Mi)\]
+   with $\epsilon_{ij}\sim N(0, \sigma^2)$. 
+   Mi has showed that  when $\sigma^2$ is below certain level, parametric based modelling approaches have advantage over non-parametric approaches (e.g. genewise in \verb"edgeR"). The aim of our analysis is to explore possible improvement if additional predictors are incorporated in the parametric dispersion model. 
+   In this section, we extend (Mi) by pooling information from other experiments. Specifically, we tried the following extensions
+   \begin{enumerate}
+   \item[$\blacktriangleright$]  adding mean relative frequencies and their quadratic terms from other experiments to (Mi)
+   \[\log(\phi_{ij})= \alpha_0 + \sum_{w=1}^K[\alpha_{w1}\pi_{iw} + \alpha_{w2}(\pi_{iw})^2] + \epsilon_{ij}  	\]
+   	where $j, w\in \{1, 2, \ldots, K\}$ and $K$ is the number of biological replicates available.\\
+    \item[$\blacktriangleright$] adding dispersions from other experiments to above model
+    \item[$\blacktriangleright$] 
+   \end{enumerate}
+ 
+%  \begin{verbatim}
+%  > head(arab)
+%          mock1 mock2 mock3 hrcc1 hrcc2 hrcc3
+%AT1G01010    35    77    40    46    64    60
+%AT1G01020    43    45    32    43    39    49
+%AT1G01030    16    24    26    27    35    20
+%AT1G01040    72    43    64    66    25    90
+%AT1G01050    49    78    90    67    45    60
+%AT1G01060     0    15     2     0    21     8
+%
+%> head(pf$estimates)
+%          [,1]      [,2]      [,3]      [,4]      [,5]      [,6]
+%[1,] 0.1879878 0.1879878 0.1879878 0.1747160 0.1747160 0.1747160
+%[2,] 0.2113727 0.2113727 0.2113727 0.2019324 0.2019324 0.2019324
+%[3,] 0.3121561 0.3121561 0.3121561 0.2513636 0.2513636 0.2513636
+%[4,] 0.1760997 0.1760997 0.1760997 0.1821039 0.1821039 0.1821039
+%[5,] 0.1642851 0.1642851 0.1642851 0.1778045 0.1778045 0.1778045
+%[6,] 0.9426165 0.9426165 0.9426165 0.5257880 0.5257880 0.5257880
+%  \end{verbatim}
 
-> head(pf$estimates)
-          [,1]      [,2]      [,3]      [,4]      [,5]      [,6]
-[1,] 0.1879878 0.1879878 0.1879878 0.1747160 0.1747160 0.1747160
-[2,] 0.2113727 0.2113727 0.2113727 0.2019324 0.2019324 0.2019324
-[3,] 0.3121561 0.3121561 0.3121561 0.2513636 0.2513636 0.2513636
-[4,] 0.1760997 0.1760997 0.1760997 0.1821039 0.1821039 0.1821039
-[5,] 0.1642851 0.1642851 0.1642851 0.1778045 0.1778045 0.1778045
-[6,] 0.9426165 0.9426165 0.9426165 0.5257880 0.5257880 0.5257880
-  \end{verbatim}
-  \[\log(\phi_{ij})= \log(\phi^0_{ij})+ \epsilon_{ij}\]
-  where $\phi^0_{ij}$s is obtained by fitting NBQ model $\epsilon_{ij}$ is assumed to be $N(0, \sigma^2)$. \\
-  
-   Gu has showed that  when $\sigma^2$ is below certain level, parametric based modelling approaches have advantage over non-parametric approaches (e.g. genewise in \verb"edgeR"). The aim of our analysis is to explore possible improvement if additional predictors are incorporated in the parametric dispersion model. Specifically, we tried the following models
    \begin{enumerate}
    \item The true dispersion is a function of relative means, but 
-   \[\log(\phi_{ij})= \alpha_0 + \sum_{j=1}^n(\alpha_{l1}\pi_{ij} + \alpha_{l2}[\pi_{jk, l}]^2) + \epsilon_{kj} \]
+   \[\log(\phi_{ij})= \alpha_0 + \sum_{j=1}^n(\alpha_{l1}\pi_{ij} + \alpha_{l2}[\pi_{jk, l}]^2) + \epsilon_{ij} \]
    \end{enumerate}
 
-   	and 
-   	\[\log(\phi_{kj,l'})= \alpha_0 + \sum_{l=1}^L[\alpha_{l1}\pi_{jk, l} + \alpha_{l2}(\pi_{jk, l})^2] + log(\phi_{kj, l''})   	\]
-   	where $l', l''\in \{1, 2, \ldots, L\}$ and $L$ is the number of labs available.\\
+   	
 	Actually we first tried Gamma regression models
 	\[\phi_{jk} \sim \text{Gamma}(\mu, \sigma), E[\phi_{jk}]=\mu,  \text{Var}[\phi_{jk}] = \sigma^2\]
 	with link function 
